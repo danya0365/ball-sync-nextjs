@@ -1,6 +1,5 @@
 
-import { Navbar } from "@/src/presentation/components/layout/Navbar";
-import { Sidebar } from "@/src/presentation/components/layout/Sidebar";
+import { AppLayout } from "@/src/presentation/components/layout/AppLayout";
 import { ThemeProvider } from "@/src/presentation/providers/ThemeProvider";
 import type { Metadata } from "next";
 import { Noto_Sans_Thai } from "next/font/google";
@@ -24,23 +23,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning className={`${notoSansThai.variable}`}>
-      <body className="min-h-screen bg-background text-foreground font-sans antialiased flex flex-col">
+      <body className="min-h-screen font-sans antialiased">
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
-          {/* Main App Layout Container */}
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <div className="flex flex-col flex-1">
-              <Navbar />
-              <main className="flex-1 p-6 lg:p-8 bg-surface-50 dark:bg-[#09090b] border-l border-border rounded-tl-xl mt-16 lg:mt-0">
-                {children}
-              </main>
-            </div>
-          </div>
+          <AppLayout>
+            {children}
+          </AppLayout>
         </ThemeProvider>
       </body>
     </html>
