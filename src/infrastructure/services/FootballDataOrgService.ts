@@ -62,6 +62,20 @@ export class FootballDataOrgService implements IExternalFootballService {
     return response.json();
   }
 
+  private mapStatus(strStatus?: string): 'SCHEDULED' | 'IN_PLAY' | 'FINISHED' | 'PAUSED' | 'CANCELLED' {
+    if (!strStatus) return 'SCHEDULED';
+    const status = strStatus.toUpperCase();
+    
+    // Football-data.org uses: SCHEDULED, TIMED, IN_PLAY, PAUSED, EXTRA_TIME, PENALTY_SHOOTOUT, FINISHED, SUSPENDED, POSTPONED, CANCELLED, AWARDED
+    if (status === 'FINISHED' || status === 'AWARDED') return 'FINISHED';
+    if (status === 'IN_PLAY' || status === 'EXTRA_TIME' || status === 'PENALTY_SHOOTOUT') return 'IN_PLAY';
+    if (status === 'PAUSED' || status === 'SUSPENDED') return 'PAUSED';
+    if (status === 'CANCELLED' || status === 'POSTPONED') return 'CANCELLED';
+    
+    // TIMED or SCHEDULED or anything else
+    return 'SCHEDULED';
+  }
+
   async fetchLiveMatches(): Promise<NormalizedMatch[]> {
     try {
       // Fetch today's matches (or IN_PLAY directly if the API supports it without premium filters)
@@ -74,7 +88,7 @@ export class FootballDataOrgService implements IExternalFootballService {
         homeTeam: m.homeTeam?.name || 'Unknown',
         awayTeam: m.awayTeam?.name || 'Unknown',
         matchDate: m.utcDate,
-        status: m.status, // standardizes to roughly SCHEDULED, IN_PLAY, FINISHED, PAUSED...
+        status: this.mapStatus(m.status),
         score: {
           home: m.score?.fullTime?.home ?? null,
           away: m.score?.fullTime?.away ?? null,
