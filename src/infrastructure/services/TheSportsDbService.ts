@@ -1,6 +1,6 @@
-import { IExternalFootballApi, NormalizedMatch } from "@/src/application/repositories/IExternalFootballApi";
+import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 
-export class TheSportsDbRepository implements IExternalFootballApi {
+export class TheSportsDbService implements IExternalFootballService {
   private readonly baseUrl = 'https://www.thesportsdb.com/api/v1/json/3';
   
   getSourceName(): string {

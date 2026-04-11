@@ -1,9 +1,10 @@
-import { IExternalFootballApi } from "@/src/application/repositories/IExternalFootballApi";
+import { IExternalFootballService } from "@/src/application/services/IExternalFootballService";
 import { ISyncLogRepository } from "@/src/application/repositories/ISyncLogRepository";
+import { ISyncFootballDataUseCase } from "./ISyncFootballDataUseCase";
 
-export class SyncFootballDataUseCase {
+export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
   constructor(
-    private readonly sources: IExternalFootballApi[],
+    private readonly sources: IExternalFootballService[],
     private readonly syncLogRepository: ISyncLogRepository
   ) {}
 

@@ -1,14 +1,21 @@
 "use client";
 
+import { SyncFootballDataUseCase } from "@/src/application/use-cases/SyncFootballDataUseCase";
+import { ApiSyncLogRepository } from "@/src/infrastructure/repositories/api/ApiSyncLogRepository";
+import { ApiExternalFootballService } from "@/src/infrastructure/services/api/ApiExternalFootballService";
 import { SourcesPresenter } from "./SourcesPresenter";
-import { ApiSourcesRepository } from "@/src/infrastructure/repositories/api/ApiSourcesRepository";
 
 export class SourcesPresenterClientFactory {
   static create(): SourcesPresenter {
-    // 🛡️ Safe for client side: This delegates heavy logic to API routes avoiding CORS
-    const repository = new ApiSourcesRepository();
+    const sources = [
+      new ApiExternalFootballService("football-data.org"),
+      new ApiExternalFootballService("thesportsdb.com")
+    ];
     
-    return new SourcesPresenter(repository);
+    const logRepo = new ApiSyncLogRepository();
+    const syncUseCase = new SyncFootballDataUseCase(sources, logRepo);
+    
+    return new SourcesPresenter(logRepo, sources, syncUseCase);
   }
 }
 

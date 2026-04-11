@@ -16,7 +16,7 @@ export interface NormalizedMatch {
   };
 }
 
-export interface IExternalFootballApi {
+export interface IExternalFootballService {
   /**
    * Identifies the source (e.g. 'football-data.org', 'thesportsdb')
    */

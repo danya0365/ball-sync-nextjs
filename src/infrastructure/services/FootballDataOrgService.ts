@@ -1,6 +1,6 @@
-import { IExternalFootballApi, NormalizedMatch } from "@/src/application/repositories/IExternalFootballApi";
+import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 
-export class FootballDataOrgRepository implements IExternalFootballApi {
+export class FootballDataOrgService implements IExternalFootballService {
   private readonly baseUrl = 'https://api.football-data.org/v4';
   
   constructor(private apiKey: string = 'demo-key') {}
