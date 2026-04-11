@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { MockSyncLogRepository } from '@/src/infrastructure/repositories/mock/MockSyncLogRepository';
+import { SupabaseSyncLogRepository } from '@/src/infrastructure/repositories/supabase/SupabaseSyncLogRepository';
+import { createAdminSupabaseClient } from '@/src/infrastructure/supabase/admin';
 
 export const dynamic = "force-dynamic";
 
@@ -9,8 +10,8 @@ export async function GET(request: Request) {
     const page = parseInt(searchParams.get('page') || '1');
     const perPage = parseInt(searchParams.get('perPage') || '10');
     
-    // In production, use SupabaseSyncLogRepository
-    const repo = new MockSyncLogRepository();
+    const supabase = createAdminSupabaseClient();
+    const repo = new SupabaseSyncLogRepository(supabase);
     const data = await repo.getPaginated(page, perPage);
     
     return NextResponse.json(data);
@@ -23,7 +24,8 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const repo = new MockSyncLogRepository();
+    const supabase = createAdminSupabaseClient();
+    const repo = new SupabaseSyncLogRepository(supabase);
     const data = await repo.create(body);
     return NextResponse.json(data);
   } catch (error: any) {

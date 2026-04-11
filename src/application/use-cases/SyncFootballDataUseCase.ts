@@ -1,18 +1,19 @@
-import { IExternalFootballService } from "@/src/application/services/IExternalFootballService";
+import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 import { ISyncLogRepository } from "@/src/application/repositories/ISyncLogRepository";
+import { ISourceMatchRepository } from "@/src/application/repositories/ISourceMatchRepository";
+import { IUnifiedMatchRepository } from "@/src/application/repositories/IUnifiedMatchRepository";
+import { IMatchMappingRepository } from "@/src/application/repositories/IMatchMappingRepository";
 import { ISyncFootballDataUseCase } from "./ISyncFootballDataUseCase";
 
 export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
   constructor(
     private readonly sources: IExternalFootballService[],
-    private readonly syncLogRepository: ISyncLogRepository
+    private readonly syncLogRepository: ISyncLogRepository,
+    private readonly sourceMatchRepository: ISourceMatchRepository,
+    private readonly unifiedMatchRepository: IUnifiedMatchRepository,
+    private readonly matchMappingRepository: IMatchMappingRepository
   ) {}
 
-  /**
-   * Execute synchronization from a specific source
-   * @param sourceName name of the source or 'all'
-   * @param triggeredBy 'cron' | 'manual'
-   */
   async execute(sourceName: string = 'all', triggeredBy: 'cron' | 'manual' = 'manual') {
     const results = [];
     const targetSources = sourceName === 'all' 
@@ -29,8 +30,11 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
         // 1. Fetch from external API
         const matches = await source.fetchLiveMatches();
         
-        // 2. Normalize and Map (In real logic, we would upsert to DB here)
-        // e.g. await matchRepository.upsertMany(matches)
+        // 2. Aggregate each match
+        for (const match of matches) {
+          await this.aggregateMatch(match);
+        }
+
         const recordsProcessed = matches.length;
 
         // 3. Log success
@@ -62,5 +66,41 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
     }
 
     return results;
+  }
+
+  /**
+   * Performs the aggregation logic for a single source match
+   */
+  private async aggregateMatch(match: NormalizedMatch) {
+    // 1. Resolve Entity: Find if we already know this match
+    let unifiedId = await this.matchMappingRepository.findUnifiedId(match.sourceName, match.externalId);
+
+    if (unifiedId) {
+      // Update existing unified record
+      await this.unifiedMatchRepository.upsert({
+        id: unifiedId,
+        status: match.status,
+        score: match.score,
+        lastUpdatedBySource: match.sourceName,
+      });
+    } else {
+      // Create new Unified Record
+      const unifiedMatch = await this.unifiedMatchRepository.upsert({
+        homeTeamNameEn: match.homeTeam,
+        awayTeamNameEn: match.awayTeam,
+        matchDate: match.matchDate,
+        status: match.status,
+        score: match.score,
+        lastUpdatedBySource: match.sourceName,
+      });
+      
+      unifiedId = unifiedMatch.id;
+      
+      // Create Mapping
+      await this.matchMappingRepository.createMapping(match.sourceName, match.externalId, unifiedId);
+    }
+
+    // 2. Preserves Source Data
+    await this.sourceMatchRepository.upsert(match, unifiedId);
   }
 }
