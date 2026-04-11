@@ -13,7 +13,7 @@ export interface UnifiedMatch {
   awayTeamNameEn: string;
   awayTeamNameTh?: string;
   matchDate: string;
-  status: 'SCHEDULED' | 'IN_PLAY' | 'FINISHED' | 'PAUSED' | 'CANCELLED';
+  status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   score: {
     home: number | null;
     away: number | null;
@@ -22,6 +22,7 @@ export interface UnifiedMatch {
   };
   lastUpdatedBySource: string;
   updatedAt: string;
+  isApproved: boolean;
 }
 
 /**
@@ -31,5 +32,6 @@ export interface UnifiedMatch {
 export interface IUnifiedMatchRepository {
   getAll(): Promise<UnifiedMatch[]>;
   getById(id: string): Promise<UnifiedMatch | null>;
+  findMatchesByDateRange(startDate: string, endDate: string): Promise<UnifiedMatch[]>;
   upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch>;
 }

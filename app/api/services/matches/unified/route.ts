@@ -5,12 +5,22 @@ import { createAdminSupabaseClient } from '@/src/infrastructure/supabase/admin';
 /**
  * API Route for Unified Match (Golden Record)
  */
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const startDate = searchParams.get('startDate');
+    const endDate = searchParams.get('endDate');
+
     const supabase = createAdminSupabaseClient();
     const repo = new SupabaseUnifiedMatchRepository(supabase);
-    const data = await repo.getAll();
-    return NextResponse.json(data);
+    
+    if (startDate && endDate) {
+      const data = await repo.findMatchesByDateRange(startDate, endDate);
+      return NextResponse.json(data);
+    } else {
+      const data = await repo.getAll();
+      return NextResponse.json(data);
+    }
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }

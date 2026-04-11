@@ -246,6 +246,7 @@ export type Database = {
           home_team_name_en: string
           home_team_name_th: string | null
           id: string
+          is_approved: boolean | null
           last_updated_by_source: string | null
           league_name_en: string | null
           league_name_th: string | null
@@ -265,6 +266,7 @@ export type Database = {
           home_team_name_en: string
           home_team_name_th?: string | null
           id?: string
+          is_approved?: boolean | null
           last_updated_by_source?: string | null
           league_name_en?: string | null
           league_name_th?: string | null
@@ -284,6 +286,7 @@ export type Database = {
           home_team_name_en?: string
           home_team_name_th?: string | null
           id?: string
+          is_approved?: boolean | null
           last_updated_by_source?: string | null
           league_name_en?: string | null
           league_name_th?: string | null
@@ -397,10 +400,16 @@ export type Database = {
     Enums: {
       match_status:
         | "SCHEDULED"
+        | "TIMED"
         | "IN_PLAY"
-        | "FINISHED"
         | "PAUSED"
+        | "EXTRA_TIME"
+        | "PENALTY_SHOOTOUT"
+        | "FINISHED"
+        | "SUSPENDED"
+        | "POSTPONED"
         | "CANCELLED"
+        | "AWARDED"
       profile_role: "student" | "instructor" | "admin"
       sync_log_status: "success" | "failed" | "partial"
     }
@@ -530,7 +539,19 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      match_status: ["SCHEDULED", "IN_PLAY", "FINISHED", "PAUSED", "CANCELLED"],
+      match_status: [
+        "SCHEDULED",
+        "TIMED",
+        "IN_PLAY",
+        "PAUSED",
+        "EXTRA_TIME",
+        "PENALTY_SHOOTOUT",
+        "FINISHED",
+        "SUSPENDED",
+        "POSTPONED",
+        "CANCELLED",
+        "AWARDED",
+      ],
       profile_role: ["student", "instructor", "admin"],
       sync_log_status: ["success", "failed", "partial"],
     },

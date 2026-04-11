@@ -1,5 +1,20 @@
 import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 
+export interface TheSportsDbEvent {
+  idEvent: string;
+  strHomeTeam: string;
+  strAwayTeam: string;
+  strTimestamp?: string;
+  dateEvent?: string;
+  strStatus?: string;
+  intHomeScore?: string;
+  intAwayScore?: string;
+}
+
+export interface TheSportsDbResponse {
+  events: TheSportsDbEvent[] | null;
+}
+
 export class TheSportsDbService implements IExternalFootballService {
   // Use public tier "3" API by default if key is not provided
   private readonly baseUrl = process.env.THESPORTSDB_BASE_URL || 'https://www.thesportsdb.com/api/v1/json/3';
@@ -57,7 +72,7 @@ export class TheSportsDbService implements IExternalFootballService {
     return response.json();
   }
 
-  private mapStatus(strStatus?: string): 'SCHEDULED' | 'IN_PLAY' | 'FINISHED' | 'PAUSED' | 'CANCELLED' {
+  private mapStatus(strStatus?: string): 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED' {
     if (!strStatus) return 'SCHEDULED';
     const status = strStatus.toUpperCase();
     
@@ -73,15 +88,15 @@ export class TheSportsDbService implements IExternalFootballService {
     try {
       // Free tier: get today's matches. Note: Live ticker requires premium API.
       const today = new Date().toISOString().split('T')[0];
-      const data = await this.fetchApi<any>(`/eventsday.php?d=${today}&s=Soccer`);
+      const data = await this.fetchApi<TheSportsDbResponse>(`/eventsday.php?d=${today}&s=Soccer`);
       const events = data.events || [];
 
-      return events.map((event: any) => ({
+      return events.map((event: TheSportsDbEvent) => ({
         externalId: event.idEvent,
         sourceName: this.getSourceName(),
         homeTeam: event.strHomeTeam,
         awayTeam: event.strAwayTeam,
-        matchDate: event.strTimestamp || event.dateEvent, // ISO String preferably
+        matchDate: event.strTimestamp || event.dateEvent || new Date().toISOString(),
         status: this.mapStatus(event.strStatus),
         score: {
           home: event.intHomeScore ? parseInt(event.intHomeScore, 10) : null,

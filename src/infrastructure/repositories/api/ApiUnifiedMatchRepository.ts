@@ -20,6 +20,13 @@ export class ApiUnifiedMatchRepository implements IUnifiedMatchRepository {
     return res.json();
   }
 
+  async findMatchesByDateRange(startDate: string, endDate: string): Promise<UnifiedMatch[]> {
+    const query = new URLSearchParams({ startDate, endDate }).toString();
+    const res = await fetch(`${this.baseUrl}?${query}`);
+    if (!res.ok) throw new Error("Failed to find matches by date range");
+    return res.json();
+  }
+
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {
     const res = await fetch(this.baseUrl, {
       method: 'POST',

@@ -10,7 +10,7 @@ EXCEPTION
 END $$;
 
 DO $$ BEGIN
-    CREATE TYPE public.match_status AS ENUM ('SCHEDULED', 'IN_PLAY', 'FINISHED', 'PAUSED', 'CANCELLED');
+    CREATE TYPE public.match_status AS ENUM ('SCHEDULED', 'TIMED', 'IN_PLAY', 'PAUSED', 'EXTRA_TIME', 'PENALTY_SHOOTOUT', 'FINISHED', 'SUSPENDED', 'POSTPONED', 'CANCELLED', 'AWARDED');
 EXCEPTION
     WHEN duplicate_object THEN null;
 END $$;
@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS public.unified_matches (
     half_time_away INTEGER,
     last_updated_by_source TEXT,
     metadata JSONB DEFAULT '{}'::jsonb,
+    is_approved BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );

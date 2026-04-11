@@ -1,5 +1,21 @@
 import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 
+export interface FootballDataMatch {
+  id: number;
+  utcDate: string;
+  status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
+  homeTeam?: { name: string };
+  awayTeam?: { name: string };
+  score?: {
+    fullTime?: { home: number | null, away: number | null };
+    halfTime?: { home: number | null, away: number | null };
+  };
+}
+
+export interface FootballDataResponse {
+  matches?: FootballDataMatch[];
+}
+
 export class FootballDataOrgService implements IExternalFootballService {
   private readonly baseUrl = process.env.FOOTBALL_DATA_BASE_URL || 'https://api.football-data.org/v4';
   private readonly apiKey = process.env.FOOTBALL_DATA_API_KEY || '';
@@ -62,33 +78,19 @@ export class FootballDataOrgService implements IExternalFootballService {
     return response.json();
   }
 
-  private mapStatus(strStatus?: string): 'SCHEDULED' | 'IN_PLAY' | 'FINISHED' | 'PAUSED' | 'CANCELLED' {
-    if (!strStatus) return 'SCHEDULED';
-    const status = strStatus.toUpperCase();
-    
-    // Football-data.org uses: SCHEDULED, TIMED, IN_PLAY, PAUSED, EXTRA_TIME, PENALTY_SHOOTOUT, FINISHED, SUSPENDED, POSTPONED, CANCELLED, AWARDED
-    if (status === 'FINISHED' || status === 'AWARDED') return 'FINISHED';
-    if (status === 'IN_PLAY' || status === 'EXTRA_TIME' || status === 'PENALTY_SHOOTOUT') return 'IN_PLAY';
-    if (status === 'PAUSED' || status === 'SUSPENDED') return 'PAUSED';
-    if (status === 'CANCELLED' || status === 'POSTPONED') return 'CANCELLED';
-    
-    // TIMED or SCHEDULED or anything else
-    return 'SCHEDULED';
-  }
-
   async fetchLiveMatches(): Promise<NormalizedMatch[]> {
     try {
       // Fetch today's matches (or IN_PLAY directly if the API supports it without premium filters)
-      const data = await this.fetchApi<any>('/matches');
+      const data = await this.fetchApi<FootballDataResponse>('/matches');
       const matches = data.matches || [];
 
-      return matches.map((m: any) => ({
+      return matches.map((m: FootballDataMatch) => ({
         externalId: m.id.toString(),
         sourceName: this.getSourceName(),
         homeTeam: m.homeTeam?.name || 'Unknown',
         awayTeam: m.awayTeam?.name || 'Unknown',
         matchDate: m.utcDate,
-        status: this.mapStatus(m.status),
+        status: m.status,
         score: {
           home: m.score?.fullTime?.home ?? null,
           away: m.score?.fullTime?.away ?? null,
