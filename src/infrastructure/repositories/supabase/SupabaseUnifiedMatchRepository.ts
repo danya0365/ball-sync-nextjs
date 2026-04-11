@@ -49,16 +49,35 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
       updated_at: new Date().toISOString()
     };
 
-    if (match.id) payload.id = match.id;
+    // Remove undefined properties so they don't overwrite or cause PG issues
+    Object.keys(payload).forEach(key => {
+      if (payload[key] === undefined) {
+        delete payload[key];
+      }
+    });
 
-    const { data, error } = await this.supabase
-      .from('unified_matches')
-      .upsert(payload, { onConflict: match.id ? 'id' : undefined })
-      .select()
-      .single();
+    if (match.id) {
+      // Explictly use .update() to avoid "missing NOT NULL" issues on UPSERT for omitted fields
+      const { data, error } = await this.supabase
+        .from('unified_matches')
+        .update(payload)
+        .eq('id', match.id)
+        .select()
+        .single();
 
-    if (error) throw new Error(error.message);
-    return this.mapToUnifiedMatch(data);
+      if (error) throw new Error(`Unified Update Error: ${error.message}`);
+      return this.mapToUnifiedMatch(data);
+    } else {
+      // Explicitly use .insert() for a brand new record
+      const { data, error } = await this.supabase
+        .from('unified_matches')
+        .insert(payload)
+        .select()
+        .single();
+
+      if (error) throw new Error(`Unified Insert Error: ${error.message}`);
+      return this.mapToUnifiedMatch(data);
+    }
   }
 
   private mapToUnifiedMatch(row: any): UnifiedMatch {

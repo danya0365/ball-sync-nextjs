@@ -1,50 +1,100 @@
 import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
 
 export class FootballDataOrgService implements IExternalFootballService {
-  private readonly baseUrl = 'https://api.football-data.org/v4';
+  private readonly baseUrl = process.env.FOOTBALL_DATA_BASE_URL || 'https://api.football-data.org/v4';
+  private readonly apiKey = process.env.FOOTBALL_DATA_API_KEY || '';
   
-  constructor(private apiKey: string = 'demo-key') {}
+  private requestCount: number = 0;
+  private lastRequestTime: number = Date.now();
 
   getSourceName(): string {
     return 'football-data.org';
   }
 
-  async fetchLiveMatches(): Promise<NormalizedMatch[]> {
-    // In a real application, we would use fetch with headers: { 'X-Auth-Token': this.apiKey }
-    await new Promise(resolve => setTimeout(resolve, 800)); // Simulate network latency
-    
-    return [
-      {
-        externalId: 'fd-45123',
-        sourceName: this.getSourceName(),
-        homeTeam: 'Arsenal FC',
-        awayTeam: 'Manchester United FC',
-        matchDate: new Date().toISOString(),
-        status: 'IN_PLAY',
-        score: {
-          home: 2,
-          away: 1,
-          halfTimeHome: 1,
-          halfTimeAway: 0
-        }
+  /**
+   * Check rate limit (10 requests per minute for free tier)
+   */
+  private async checkRateLimit(): Promise<void> {
+    const now = Date.now();
+    const timeDiff = now - this.lastRequestTime;
+
+    // Reset counter every minute
+    if (timeDiff > 60000) {
+      this.requestCount = 0;
+      this.lastRequestTime = now;
+    }
+
+    // Wait if rate limit exceeded
+    if (this.requestCount >= 10) {
+      const waitTime = 60000 - timeDiff;
+      console.warn(`[${this.getSourceName()}] Rate limit reached. Waiting ${waitTime}ms...`);
+      await new Promise((resolve) => setTimeout(resolve, waitTime));
+      this.requestCount = 0;
+      this.lastRequestTime = Date.now();
+    }
+
+    this.requestCount++;
+  }
+
+  private async fetchApi<T>(endpoint: string): Promise<T> {
+    await this.checkRateLimit();
+
+    const response = await fetch(`${this.baseUrl}${endpoint}`, {
+      headers: {
+        'X-Auth-Token': this.apiKey,
+        'Content-Type': 'application/json'
       },
-      {
-        externalId: 'fd-45124',
-        sourceName: this.getSourceName(),
-        homeTeam: 'Liverpool FC',
-        awayTeam: 'Chelsea FC',
-        matchDate: new Date(Date.now() + 3600000).toISOString(),
-        status: 'SCHEDULED',
-        score: {
-          home: null,
-          away: null
-        }
+      // Optional: Add Next.js caching behaviour if needed. Currently passing to dynamic fetches.
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      const message = await response.text();
+      switch (response.status) {
+        case 400: throw new Error(`Bad Request: ${message}`);
+        case 403: throw new Error("Forbidden: Invalid API key or plan limits");
+        case 404: throw new Error(`Not Found: ${message}`);
+        case 429: throw new Error("Too Many Requests: Rate limit exceeded");
+        default: throw new Error(`API Error (${response.status}): ${message}`);
       }
-    ];
+    }
+
+    return response.json();
+  }
+
+  async fetchLiveMatches(): Promise<NormalizedMatch[]> {
+    try {
+      // Fetch today's matches (or IN_PLAY directly if the API supports it without premium filters)
+      const data = await this.fetchApi<any>('/matches');
+      const matches = data.matches || [];
+
+      return matches.map((m: any) => ({
+        externalId: m.id.toString(),
+        sourceName: this.getSourceName(),
+        homeTeam: m.homeTeam?.name || 'Unknown',
+        awayTeam: m.awayTeam?.name || 'Unknown',
+        matchDate: m.utcDate,
+        status: m.status, // standardizes to roughly SCHEDULED, IN_PLAY, FINISHED, PAUSED...
+        score: {
+          home: m.score?.fullTime?.home ?? null,
+          away: m.score?.fullTime?.away ?? null,
+          halfTimeHome: m.score?.halfTime?.home ?? null,
+          halfTimeAway: m.score?.halfTime?.away ?? null
+        }
+      }));
+    } catch (error: any) {
+      console.error(`[${this.getSourceName()}] fetchLiveMatches error:`, error);
+      throw error;
+    }
   }
 
   async ping(): Promise<boolean> {
-    await new Promise(resolve => setTimeout(resolve, 200));
-    return true; // Simulate successful connection
+    try {
+      // Smallest payload to test connection/auth
+      await this.fetchApi('/competitions?areas=2077'); 
+      return true;
+    } catch (error) {
+      return false;
+    }
   }
 }
