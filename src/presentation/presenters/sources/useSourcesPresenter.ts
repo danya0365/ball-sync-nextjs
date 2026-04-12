@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { SourcesViewModel } from "./SourcesPresenter";
+import { SourcesViewModel, SourcesDomain } from "./SourcesPresenter";
 import { createClientSourcesPresenter } from "./SourcesPresenterClientFactory";
 
 export function useSourcesPresenter(initialViewModel?: SourcesViewModel) {
@@ -9,6 +9,7 @@ export function useSourcesPresenter(initialViewModel?: SourcesViewModel) {
   const [loading, setLoading] = useState(!initialViewModel);
   const [syncingSource, setSyncingSource] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [activeDomain, setActiveDomain] = useState<SourcesDomain>('matches');
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -49,6 +50,8 @@ export function useSourcesPresenter(initialViewModel?: SourcesViewModel) {
     loading,
     syncingSource,
     error,
+    activeDomain,
+    setActiveDomain,
     handleSync,
     refresh: loadData
   };

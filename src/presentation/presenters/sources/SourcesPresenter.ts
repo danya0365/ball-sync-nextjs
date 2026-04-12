@@ -2,6 +2,8 @@ import { ISyncLogRepository, SyncLog } from "@/src/application/repositories/ISyn
 import { IExternalFootballService } from "@/src/application/services/IExternalFootballService";
 import { ISyncFootballDataUseCase } from "@/src/application/use-cases/ISyncFootballDataUseCase";
 
+export type SourcesDomain = 'matches' | 'teams' | 'leagues' | 'players';
+
 export interface SourceStatus {
   name: string;
   isOnline: boolean;

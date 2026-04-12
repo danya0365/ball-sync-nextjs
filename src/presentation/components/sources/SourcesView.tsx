@@ -1,17 +1,24 @@
 "use client";
 
 import { useSourcesPresenter } from "@/src/presentation/presenters/sources/useSourcesPresenter";
-import { SourcesViewModel } from "@/src/presentation/presenters/sources/SourcesPresenter";
+import { SourcesViewModel, SourcesDomain } from "@/src/presentation/presenters/sources/SourcesPresenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/presentation/components/ui/Card";
 import { Button } from "@/src/presentation/components/ui/Button";
 import { Database, RefreshCw, Server, AlertCircle, CheckCircle2, History } from "lucide-react";
+
+const DOMAINS: { id: SourcesDomain, label: string, disabled?: boolean }[] = [
+  { id: 'matches', label: 'Matches' },
+  { id: 'teams', label: 'Teams', disabled: true },
+  { id: 'leagues', label: 'Leagues', disabled: true },
+  { id: 'players', label: 'Players', disabled: true },
+];
 
 interface SourcesViewProps {
   initialViewModel?: SourcesViewModel;
 }
 
 export function SourcesView({ initialViewModel }: SourcesViewProps) {
-  const { viewModel, loading, syncingSource, error, handleSync } = useSourcesPresenter(initialViewModel);
+  const { viewModel, loading, syncingSource, error, activeDomain, setActiveDomain, handleSync } = useSourcesPresenter(initialViewModel);
 
   if (loading || !viewModel) {
     return <div className="animate-pulse space-y-4 p-4">
@@ -48,6 +55,28 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
         </div>
       )}
 
+      {/* Tier 1: Domain Selection */}
+      <div className="flex flex-wrap gap-2">
+        {DOMAINS.map(domain => (
+          <button
+            key={domain.id}
+            onClick={() => !domain.disabled && setActiveDomain(domain.id)}
+            disabled={domain.disabled}
+            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+              activeDomain === domain.id
+                ? "bg-slate-800 dark:bg-white text-white dark:text-slate-900 shadow-md transform scale-105"
+                : domain.disabled
+                  ? "bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-dashed border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+            }`}
+          >
+            {domain.label}
+            {domain.disabled && <span className="ml-2 text-[10px] font-normal uppercase tracking-wider opacity-60">Soon</span>}
+          </button>
+        ))}
+      </div>
+
+      {activeDomain === 'matches' && (
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {viewModel.sources.map((source) => (
           <Card key={source.name} className="relative overflow-hidden bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-xl hover:shadow-2xl transition-all group">
@@ -100,6 +129,7 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
           </Card>
         ))}
       </div>
+      )}
 
       <div className="pt-4">
         <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6">
