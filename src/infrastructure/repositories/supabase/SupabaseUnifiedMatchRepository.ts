@@ -124,6 +124,12 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
       away_score: match.score?.away,
       half_time_home: match.score?.halfTimeHome,
       half_time_away: match.score?.halfTimeAway,
+      extra_time_home: match.score?.extraTimeHome,
+      extra_time_away: match.score?.extraTimeAway,
+      penalties_home: match.score?.penaltiesHome,
+      penalties_away: match.score?.penaltiesAway,
+      match_stage: match.matchStage,
+      group_name: match.groupName,
       last_updated_by_source: match.lastUpdatedBySource,
       is_approved: match.isApproved,
       updated_at: new Date().toISOString()
@@ -171,11 +177,17 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
       awayTeamNameTh: row.away_team_name_th ?? undefined,
       matchDate: row.match_date,
       status: row.status,
+      matchStage: row.match_stage ?? undefined,
+      groupName: row.group_name ?? undefined,
       score: {
         home: row.home_score,
         away: row.away_score,
         halfTimeHome: row.half_time_home ?? undefined,
-        halfTimeAway: row.half_time_away ?? undefined
+        halfTimeAway: row.half_time_away ?? undefined,
+        extraTimeHome: row.extra_time_home ?? undefined,
+        extraTimeAway: row.extra_time_away ?? undefined,
+        penaltiesHome: row.penalties_home ?? undefined,
+        penaltiesAway: row.penalties_away ?? undefined
       },
       lastUpdatedBySource: row.last_updated_by_source || 'Unknown',
       isApproved: row.is_approved || false,

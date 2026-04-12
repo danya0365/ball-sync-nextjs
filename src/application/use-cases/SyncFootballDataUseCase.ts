@@ -169,6 +169,8 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
           id: unifiedId,
           leagueNameEn: match.leagueName,
           status: match.status,
+          matchStage: match.stage,
+          groupName: match.group,
           score: match.score,
           lastUpdatedBySource: match.sourceName,
         });
@@ -181,6 +183,8 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
           homeTeamNameEn: match.homeTeam,
           awayTeamNameEn: match.awayTeam,
           matchDate: match.matchDate,
+          matchStage: match.stage,
+          groupName: match.group,
           status: match.status,
           score: match.score,
           lastUpdatedBySource: match.sourceName,

@@ -18,6 +18,8 @@ export interface SourceMatch {
   awayTeamName?: string | null;
   matchDate?: string | null;
   status?: string | null;
+  matchStage?: string | null;
+  groupName?: string | null;
   unifiedMatchId?: string | null;
   rawData?: any;
 }

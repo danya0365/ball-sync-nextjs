@@ -52,6 +52,12 @@ export class SupabaseSourceMatchRepository implements ISourceMatchRepository {
         away_score: match.score.away,
         half_time_home: match.score.halfTimeHome,
         half_time_away: match.score.halfTimeAway,
+        extra_time_home: match.score.extraTimeHome,
+        extra_time_away: match.score.extraTimeAway,
+        penalties_home: match.score.penaltiesHome,
+        penalties_away: match.score.penaltiesAway,
+        match_stage: match.stage,
+        group_name: match.group,
         unified_match_id: unifiedMatchId,
         raw_data: match as any,
         updated_at: new Date().toISOString()
@@ -81,6 +87,8 @@ export class SupabaseSourceMatchRepository implements ISourceMatchRepository {
       awayTeamName: row.away_team_name,
       matchDate: row.match_date,
       status: row.status,
+      matchStage: row.match_stage,
+      groupName: row.group_name,
       unifiedMatchId: row.unified_match_id,
       rawData: row.raw_data
     };

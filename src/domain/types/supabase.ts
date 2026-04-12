@@ -250,12 +250,18 @@ export type Database = {
           away_team_name: string | null
           created_at: string | null
           external_id: string
+          extra_time_away: number | null
+          extra_time_home: number | null
+          group_name: string | null
           half_time_away: number | null
           half_time_home: number | null
           home_score: number | null
           home_team_name: string | null
           id: string
           match_date: string | null
+          match_stage: string | null
+          penalties_away: number | null
+          penalties_home: number | null
           raw_data: Json | null
           source_name: string
           status: string | null
@@ -267,12 +273,18 @@ export type Database = {
           away_team_name?: string | null
           created_at?: string | null
           external_id: string
+          extra_time_away?: number | null
+          extra_time_home?: number | null
+          group_name?: string | null
           half_time_away?: number | null
           half_time_home?: number | null
           home_score?: number | null
           home_team_name?: string | null
           id?: string
           match_date?: string | null
+          match_stage?: string | null
+          penalties_away?: number | null
+          penalties_home?: number | null
           raw_data?: Json | null
           source_name: string
           status?: string | null
@@ -284,12 +296,18 @@ export type Database = {
           away_team_name?: string | null
           created_at?: string | null
           external_id?: string
+          extra_time_away?: number | null
+          extra_time_home?: number | null
+          group_name?: string | null
           half_time_away?: number | null
           half_time_home?: number | null
           home_score?: number | null
           home_team_name?: string | null
           id?: string
           match_date?: string | null
+          match_stage?: string | null
+          penalties_away?: number | null
+          penalties_home?: number | null
           raw_data?: Json | null
           source_name?: string
           status?: string | null
@@ -525,6 +543,9 @@ export type Database = {
           away_team_name_en: string
           away_team_name_th: string | null
           created_at: string | null
+          extra_time_away: number | null
+          extra_time_home: number | null
+          group_name: string | null
           half_time_away: number | null
           half_time_home: number | null
           home_score: number | null
@@ -536,7 +557,10 @@ export type Database = {
           league_name_en: string | null
           league_name_th: string | null
           match_date: string
+          match_stage: string | null
           metadata: Json | null
+          penalties_away: number | null
+          penalties_home: number | null
           status: Database["public"]["Enums"]["match_status"]
           updated_at: string | null
         }
@@ -545,6 +569,9 @@ export type Database = {
           away_team_name_en: string
           away_team_name_th?: string | null
           created_at?: string | null
+          extra_time_away?: number | null
+          extra_time_home?: number | null
+          group_name?: string | null
           half_time_away?: number | null
           half_time_home?: number | null
           home_score?: number | null
@@ -556,7 +583,10 @@ export type Database = {
           league_name_en?: string | null
           league_name_th?: string | null
           match_date: string
+          match_stage?: string | null
           metadata?: Json | null
+          penalties_away?: number | null
+          penalties_home?: number | null
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string | null
         }
@@ -565,6 +595,9 @@ export type Database = {
           away_team_name_en?: string
           away_team_name_th?: string | null
           created_at?: string | null
+          extra_time_away?: number | null
+          extra_time_home?: number | null
+          group_name?: string | null
           half_time_away?: number | null
           half_time_home?: number | null
           home_score?: number | null
@@ -576,7 +609,10 @@ export type Database = {
           league_name_en?: string | null
           league_name_th?: string | null
           match_date?: string
+          match_stage?: string | null
           metadata?: Json | null
+          penalties_away?: number | null
+          penalties_home?: number | null
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string | null
         }

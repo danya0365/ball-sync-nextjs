@@ -9,6 +9,8 @@ export interface TheSportsDbEvent {
   strTimestamp?: string;
   dateEvent?: string;
   strStatus?: string;
+  strRound?: string;
+  strSeason?: string;
   intHomeScore?: string;
   intAwayScore?: string;
 }
@@ -121,10 +123,11 @@ export class TheSportsDbService implements IExternalFootballService {
         leagueExternalId: event.idLeague,
         matchDate: event.strTimestamp || event.dateEvent || new Date().toISOString(),
         status: this.mapStatus(event.strStatus),
+        stage: event.strRound,
         score: {
           home: event.intHomeScore ? parseInt(event.intHomeScore, 10) : null,
           away: event.intAwayScore ? parseInt(event.intAwayScore, 10) : null,
-          halfTimeHome: null, // Depending on API tier, might not be provided in free
+          halfTimeHome: null, 
           halfTimeAway: null
         }
       }));

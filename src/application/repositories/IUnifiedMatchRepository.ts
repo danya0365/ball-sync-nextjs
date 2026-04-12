@@ -14,11 +14,17 @@ export interface UnifiedMatch {
   awayTeamNameTh?: string;
   matchDate: string;
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
+  matchStage?: string;
+  groupName?: string;
   score: {
     home: number | null;
     away: number | null;
     halfTimeHome?: number | null;
     halfTimeAway?: number | null;
+    extraTimeHome?: number | null;
+    extraTimeAway?: number | null;
+    penaltiesHome?: number | null;
+    penaltiesAway?: number | null;
   };
   lastUpdatedBySource: string;
   updatedAt: string;

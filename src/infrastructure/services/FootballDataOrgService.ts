@@ -4,12 +4,16 @@ export interface FootballDataMatch {
   id: number;
   utcDate: string;
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
+  stage?: string;
+  group?: string;
   homeTeam?: { name: string };
   awayTeam?: { name: string };
   competition?: { id: number; name: string };
   score?: {
     fullTime?: { home: number | null, away: number | null };
     halfTime?: { home: number | null, away: number | null };
+    extraTime?: { home: number | null, away: number | null };
+    penalties?: { home: number | null, away: number | null };
   };
 }
 
@@ -115,12 +119,18 @@ export class FootballDataOrgService implements IExternalFootballService {
         leagueName: m.competition?.name,
         leagueExternalId: m.competition?.id?.toString(),
         matchDate: m.utcDate,
+        stage: m.stage,
+        group: m.group,
         status: m.status,
         score: {
           home: m.score?.fullTime?.home ?? null,
           away: m.score?.fullTime?.away ?? null,
           halfTimeHome: m.score?.halfTime?.home ?? null,
-          halfTimeAway: m.score?.halfTime?.away ?? null
+          halfTimeAway: m.score?.halfTime?.away ?? null,
+          extraTimeHome: m.score?.extraTime?.home ?? null,
+          extraTimeAway: m.score?.extraTime?.away ?? null,
+          penaltiesHome: m.score?.penalties?.home ?? null,
+          penaltiesAway: m.score?.penalties?.away ?? null
         }
       }));
     } catch (error: any) {
