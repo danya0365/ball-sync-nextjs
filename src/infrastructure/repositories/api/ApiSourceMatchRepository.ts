@@ -20,4 +20,14 @@ export class ApiSourceMatchRepository implements ISourceMatchRepository {
     if (!res.ok) return null;
     return res.json();
   }
+
+  async query(params: import("@/src/application/repositories/ISourceMatchRepository").SourceMatchQuery): Promise<import("@/src/application/repositories/ISourceMatchRepository").SourceMatchQueryResult> {
+    const res = await fetch('/api/services/matches/source/query', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(params)
+    });
+    if (!res.ok) throw new Error("Failed to query source matches");
+    return res.json();
+  }
 }
