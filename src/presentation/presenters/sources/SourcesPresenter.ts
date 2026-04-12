@@ -1,6 +1,7 @@
 import { ISyncLogRepository, SyncLog } from "@/src/application/repositories/ISyncLogRepository";
 import { IExternalFootballService } from "@/src/application/services/IExternalFootballService";
 import { ISyncFootballDataUseCase } from "@/src/application/use-cases/ISyncFootballDataUseCase";
+import { SyncDomain } from "@/src/application/use-cases/SyncFootballDataUseCase";
 
 export type SourcesDomain = 'matches' | 'teams' | 'leagues' | 'players';
 
@@ -47,7 +48,7 @@ export class SourcesPresenter {
     };
   }
 
-  async triggerManualSync(sourceName: string = 'all'): Promise<void> {
-    await this.syncUseCase.execute(sourceName, 'manual');
+  async triggerManualSync(sourceName: string = 'all', domain: SyncDomain = 'all'): Promise<void> {
+    await this.syncUseCase.execute(sourceName, 'manual', domain);
   }
 }

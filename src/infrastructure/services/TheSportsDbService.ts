@@ -1,4 +1,4 @@
-import { IExternalFootballService, NormalizedMatch } from "@/src/application/services/IExternalFootballService";
+import { IExternalFootballService, NormalizedMatch, NormalizedTeam, NormalizedLeague, NormalizedPlayer } from "@/src/application/services/IExternalFootballService";
 
 export interface TheSportsDbEvent {
   idEvent: string;
@@ -13,6 +13,25 @@ export interface TheSportsDbEvent {
 
 export interface TheSportsDbResponse {
   events: TheSportsDbEvent[] | null;
+}
+
+interface TheSportsDbTeam {
+  idTeam: string;
+  strTeam: string;
+  strTeamShort?: string;
+  strCountry?: string;
+  strBadge?: string;
+  intFormedYear?: string;
+  strStadium?: string;
+  strWebsite?: string;
+}
+
+interface TheSportsDbLeague {
+  idLeague: string;
+  strLeague: string;
+  strCountry?: string;
+  strBadge?: string;
+  strCurrentSeason?: string;
 }
 
 export class TheSportsDbService implements IExternalFootballService {
@@ -109,6 +128,96 @@ export class TheSportsDbService implements IExternalFootballService {
       console.error(`[${this.getSourceName()}] fetchLiveMatches error:`, error);
       throw error;
     }
+  }
+
+  async fetchLeagues(): Promise<NormalizedLeague[]> {
+    try {
+      // Search major football countries
+      const countries = ['England', 'Spain', 'Germany', 'Italy', 'France'];
+      const allLeagues: NormalizedLeague[] = [];
+      const seenIds = new Set<string>();
+
+      for (const country of countries) {
+        try {
+          const data = await this.fetchApi<{ countries: TheSportsDbLeague[] | null }>(
+            `/search_all_leagues.php?c=${encodeURIComponent(country)}&s=Soccer`
+          );
+          const leagues = data.countries || [];
+          
+          for (const l of leagues) {
+            if (!seenIds.has(l.idLeague)) {
+              seenIds.add(l.idLeague);
+              allLeagues.push({
+                externalId: l.idLeague,
+                sourceName: this.getSourceName(),
+                name: l.strLeague,
+                country: l.strCountry,
+                emblemUrl: l.strBadge,
+                type: 'LEAGUE',
+                currentSeason: l.strCurrentSeason
+              });
+            }
+          }
+        } catch (leagueError: any) {
+          console.warn(`[${this.getSourceName()}] Skipping leagues for ${country}: ${leagueError.message}`);
+        }
+      }
+
+      return allLeagues;
+    } catch (error: any) {
+      console.error(`[${this.getSourceName()}] fetchLeagues error:`, error);
+      throw error;
+    }
+  }
+
+  async fetchTeams(): Promise<NormalizedTeam[]> {
+    try {
+      // Step 1: Get leagues first to find league names for team search
+      const leagues = await this.fetchLeagues();
+      const allTeams: NormalizedTeam[] = [];
+      const seenIds = new Set<string>();
+
+      // Step 2: Loop through each league to fetch teams
+      for (const league of leagues) {
+        try {
+          const data = await this.fetchApi<{ teams: TheSportsDbTeam[] | null }>(
+            `/search_all_teams.php?l=${encodeURIComponent(league.name)}`
+          );
+          const teams = data.teams || [];
+
+          for (const t of teams) {
+            if (!seenIds.has(t.idTeam)) {
+              seenIds.add(t.idTeam);
+              allTeams.push({
+                externalId: t.idTeam,
+                sourceName: this.getSourceName(),
+                name: t.strTeam,
+                shortName: t.strTeamShort,
+                country: t.strCountry,
+                crestUrl: t.strBadge,
+                foundedYear: t.intFormedYear ? parseInt(t.intFormedYear, 10) : undefined,
+                venueName: t.strStadium,
+                website: t.strWebsite
+              });
+            }
+          }
+        } catch (teamError: any) {
+          console.warn(`[${this.getSourceName()}] Skipping teams for league ${league.name}: ${teamError.message}`);
+        }
+      }
+
+      return allTeams;
+    } catch (error: any) {
+      console.error(`[${this.getSourceName()}] fetchTeams error:`, error);
+      throw error;
+    }
+  }
+
+  async fetchPlayers(): Promise<NormalizedPlayer[]> {
+    // Player search requires specific team lookup on free tier
+    // Full player sync will be available with premium API
+    console.info(`[${this.getSourceName()}] fetchPlayers: Premium API required for bulk. Returning empty.`);
+    return [];
   }
 
   async ping(): Promise<boolean> {

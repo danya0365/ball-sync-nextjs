@@ -9,6 +9,35 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      league_mappings: {
+        Row: {
+          created_at: string | null
+          external_id: string
+          source_name: string
+          unified_league_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id: string
+          source_name: string
+          unified_league_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string
+          source_name?: string
+          unified_league_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "league_mappings_unified_league_id_fkey"
+            columns: ["unified_league_id"]
+            isOneToOne: false
+            referencedRelation: "unified_leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       match_mappings: {
         Row: {
           created_at: string | null
@@ -34,6 +63,35 @@ export type Database = {
             columns: ["unified_match_id"]
             isOneToOne: false
             referencedRelation: "unified_matches"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      player_mappings: {
+        Row: {
+          created_at: string | null
+          external_id: string
+          source_name: string
+          unified_player_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id: string
+          source_name: string
+          unified_player_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string
+          source_name?: string
+          unified_player_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "player_mappings_unified_player_id_fkey"
+            columns: ["unified_player_id"]
+            isOneToOne: false
+            referencedRelation: "unified_players"
             referencedColumns: ["id"]
           },
         ]
@@ -136,6 +194,56 @@ export type Database = {
         }
         Relationships: []
       }
+      source_leagues: {
+        Row: {
+          code: string | null
+          country: string | null
+          created_at: string | null
+          emblem_url: string | null
+          external_id: string
+          id: string
+          name: string | null
+          raw_data: Json | null
+          source_name: string
+          unified_league_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          emblem_url?: string | null
+          external_id: string
+          id?: string
+          name?: string | null
+          raw_data?: Json | null
+          source_name: string
+          unified_league_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          emblem_url?: string | null
+          external_id?: string
+          id?: string
+          name?: string | null
+          raw_data?: Json | null
+          source_name?: string
+          unified_league_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_leagues_unified_league_id_fkey"
+            columns: ["unified_league_id"]
+            isOneToOne: false
+            referencedRelation: "unified_leagues"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       source_matches: {
         Row: {
           away_score: number | null
@@ -198,6 +306,106 @@ export type Database = {
           },
         ]
       }
+      source_players: {
+        Row: {
+          created_at: string | null
+          date_of_birth: string | null
+          external_id: string
+          id: string
+          name: string | null
+          nationality: string | null
+          position: string | null
+          raw_data: Json | null
+          source_name: string
+          unified_player_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          external_id: string
+          id?: string
+          name?: string | null
+          nationality?: string | null
+          position?: string | null
+          raw_data?: Json | null
+          source_name: string
+          unified_player_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          external_id?: string
+          id?: string
+          name?: string | null
+          nationality?: string | null
+          position?: string | null
+          raw_data?: Json | null
+          source_name?: string
+          unified_player_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_players_unified_player_id_fkey"
+            columns: ["unified_player_id"]
+            isOneToOne: false
+            referencedRelation: "unified_players"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      source_teams: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          crest_url: string | null
+          external_id: string
+          id: string
+          name: string | null
+          raw_data: Json | null
+          short_name: string | null
+          source_name: string
+          unified_team_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          crest_url?: string | null
+          external_id: string
+          id?: string
+          name?: string | null
+          raw_data?: Json | null
+          short_name?: string | null
+          source_name: string
+          unified_team_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          crest_url?: string | null
+          external_id?: string
+          id?: string
+          name?: string | null
+          raw_data?: Json | null
+          short_name?: string | null
+          source_name?: string
+          unified_team_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "source_teams_unified_team_id_fkey"
+            columns: ["unified_team_id"]
+            isOneToOne: false
+            referencedRelation: "unified_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sync_logs: {
         Row: {
           created_at: string | null
@@ -230,6 +438,83 @@ export type Database = {
           source_name?: string
           status?: Database["public"]["Enums"]["sync_log_status"]
           triggered_by?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      team_mappings: {
+        Row: {
+          created_at: string | null
+          external_id: string
+          source_name: string
+          unified_team_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          external_id: string
+          source_name: string
+          unified_team_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          external_id?: string
+          source_name?: string
+          unified_team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_mappings_unified_team_id_fkey"
+            columns: ["unified_team_id"]
+            isOneToOne: false
+            referencedRelation: "unified_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unified_leagues: {
+        Row: {
+          code: string | null
+          country: string | null
+          created_at: string | null
+          current_season: string | null
+          emblem_url: string | null
+          id: string
+          is_approved: boolean | null
+          last_updated_by_source: string | null
+          metadata: Json | null
+          name_en: string
+          name_th: string | null
+          type: Database["public"]["Enums"]["league_type"] | null
+          updated_at: string | null
+        }
+        Insert: {
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_season?: string | null
+          emblem_url?: string | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en: string
+          name_th?: string | null
+          type?: Database["public"]["Enums"]["league_type"] | null
+          updated_at?: string | null
+        }
+        Update: {
+          code?: string | null
+          country?: string | null
+          created_at?: string | null
+          current_season?: string | null
+          emblem_url?: string | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en?: string
+          name_th?: string | null
+          type?: Database["public"]["Enums"]["league_type"] | null
           updated_at?: string | null
         }
         Relationships: []
@@ -294,6 +579,119 @@ export type Database = {
           metadata?: Json | null
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      unified_players: {
+        Row: {
+          created_at: string | null
+          date_of_birth: string | null
+          id: string
+          is_approved: boolean | null
+          last_updated_by_source: string | null
+          metadata: Json | null
+          name_en: string
+          name_th: string | null
+          nationality: string | null
+          photo_url: string | null
+          position: Database["public"]["Enums"]["player_position"] | null
+          shirt_number: number | null
+          team_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en: string
+          name_th?: string | null
+          nationality?: string | null
+          photo_url?: string | null
+          position?: Database["public"]["Enums"]["player_position"] | null
+          shirt_number?: number | null
+          team_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          date_of_birth?: string | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en?: string
+          name_th?: string | null
+          nationality?: string | null
+          photo_url?: string | null
+          position?: Database["public"]["Enums"]["player_position"] | null
+          shirt_number?: number | null
+          team_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "unified_players_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "unified_teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      unified_teams: {
+        Row: {
+          country: string | null
+          created_at: string | null
+          crest_url: string | null
+          founded_year: number | null
+          id: string
+          is_approved: boolean | null
+          last_updated_by_source: string | null
+          metadata: Json | null
+          name_en: string
+          name_th: string | null
+          short_name: string | null
+          tla: string | null
+          updated_at: string | null
+          venue_name: string | null
+          website: string | null
+        }
+        Insert: {
+          country?: string | null
+          created_at?: string | null
+          crest_url?: string | null
+          founded_year?: number | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en: string
+          name_th?: string | null
+          short_name?: string | null
+          tla?: string | null
+          updated_at?: string | null
+          venue_name?: string | null
+          website?: string | null
+        }
+        Update: {
+          country?: string | null
+          created_at?: string | null
+          crest_url?: string | null
+          founded_year?: number | null
+          id?: string
+          is_approved?: boolean | null
+          last_updated_by_source?: string | null
+          metadata?: Json | null
+          name_en?: string
+          name_th?: string | null
+          short_name?: string | null
+          tla?: string | null
+          updated_at?: string | null
+          venue_name?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -398,6 +796,7 @@ export type Database = {
       }
     }
     Enums: {
+      league_type: "LEAGUE" | "CUP" | "SUPER_CUP" | "PLAYOFFS"
       match_status:
         | "SCHEDULED"
         | "TIMED"
@@ -410,6 +809,7 @@ export type Database = {
         | "POSTPONED"
         | "CANCELLED"
         | "AWARDED"
+      player_position: "Goalkeeper" | "Defence" | "Midfield" | "Offence"
       profile_role: "student" | "instructor" | "admin"
       sync_log_status: "success" | "failed" | "partial"
     }
@@ -539,6 +939,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      league_type: ["LEAGUE", "CUP", "SUPER_CUP", "PLAYOFFS"],
       match_status: [
         "SCHEDULED",
         "TIMED",
@@ -552,6 +953,7 @@ export const Constants = {
         "CANCELLED",
         "AWARDED",
       ],
+      player_position: ["Goalkeeper", "Defence", "Midfield", "Offence"],
       profile_role: ["student", "instructor", "admin"],
       sync_log_status: ["success", "failed", "partial"],
     },

@@ -4,13 +4,13 @@ import { useSourcesPresenter } from "@/src/presentation/presenters/sources/useSo
 import { SourcesViewModel, SourcesDomain } from "@/src/presentation/presenters/sources/SourcesPresenter";
 import { Card, CardContent, CardHeader, CardTitle } from "@/src/presentation/components/ui/Card";
 import { Button } from "@/src/presentation/components/ui/Button";
-import { Database, RefreshCw, Server, AlertCircle, CheckCircle2, History } from "lucide-react";
+import { Database, RefreshCw, Server, AlertCircle, CheckCircle2, History, Shield, Trophy, Users } from "lucide-react";
 
-const DOMAINS: { id: SourcesDomain, label: string, disabled?: boolean }[] = [
-  { id: 'matches', label: 'Matches' },
-  { id: 'teams', label: 'Teams', disabled: true },
-  { id: 'leagues', label: 'Leagues', disabled: true },
-  { id: 'players', label: 'Players', disabled: true },
+const DOMAINS: { id: SourcesDomain, label: string, icon: React.ReactNode, disabled?: boolean }[] = [
+  { id: 'matches', label: 'Matches', icon: <Trophy className="w-4 h-4" /> },
+  { id: 'teams', label: 'Teams', icon: <Shield className="w-4 h-4" /> },
+  { id: 'leagues', label: 'Leagues', icon: <Database className="w-4 h-4" /> },
+  { id: 'players', label: 'Players', icon: <Users className="w-4 h-4" /> },
 ];
 
 interface SourcesViewProps {
@@ -40,7 +40,7 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
         </div>
         <button 
           className="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white font-semibold text-sm rounded-xl shadow-lg shadow-brand-500/25 transition-all transform active:scale-95 flex items-center justify-center disabled:opacity-50 disabled:active:scale-100 disabled:shadow-none"
-          onClick={() => handleSync('all')}
+          onClick={() => handleSync('all', 'all')}
           disabled={syncingSource !== null}
         >
           <RefreshCw className={`mr-2 h-4 w-4 ${syncingSource === 'all' ? 'animate-spin' : ''}`} />
@@ -62,7 +62,7 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
             key={domain.id}
             onClick={() => !domain.disabled && setActiveDomain(domain.id)}
             disabled={domain.disabled}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
               activeDomain === domain.id
                 ? "bg-slate-800 dark:bg-white text-white dark:text-slate-900 shadow-md transform scale-105"
                 : domain.disabled
@@ -70,13 +70,14 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
                   : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
             }`}
           >
+            {domain.icon}
             {domain.label}
-            {domain.disabled && <span className="ml-2 text-[10px] font-normal uppercase tracking-wider opacity-60">Soon</span>}
+            {domain.disabled && <span className="ml-1 text-[10px] font-normal uppercase tracking-wider opacity-60">Soon</span>}
           </button>
         ))}
       </div>
 
-      {activeDomain === 'matches' && (
+      {/* Source Cards — shown for all active domains */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {viewModel.sources.map((source) => (
           <Card key={source.name} className="relative overflow-hidden bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-xl hover:shadow-2xl transition-all group">
@@ -98,27 +99,37 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex justify-between items-center mt-6">
-                <div className="flex items-center">
-                  {source.isOnline ? (
-                     <div className="flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full">
-                       <CheckCircle2 className="h-4 w-4 mr-1.5" /> Optimal Connection
-                     </div>
-                  ) : (
-                     <div className="flex items-center text-sm font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-full">
-                       <AlertCircle className="h-4 w-4 mr-1.5" /> Disconnected
-                     </div>
-                  )}
+              <div className="flex flex-col gap-3 mt-4">
+                {/* Domain tag */}
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-slate-500 font-medium uppercase tracking-wider">Sync Domain:</span>
+                  <span className="px-2.5 py-0.5 bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold rounded-full capitalize">
+                    {activeDomain}
+                  </span>
                 </div>
-                <button 
-                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-lg shadow-sm transition-colors border border-slate-200/50 dark:border-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
-                  onClick={() => handleSync(source.name)}
-                  disabled={syncingSource !== null || !source.isOnline}
-                >
-                  {syncingSource === source.name ? (
-                    <><RefreshCw className="mr-2 h-4 w-4 animate-spin text-brand-500" /> Fetching</>
-                  ) : 'Sync Now'}
-                </button>
+                
+                <div className="flex justify-between items-center">
+                  <div className="flex items-center">
+                    {source.isOnline ? (
+                       <div className="flex items-center text-sm font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-500/10 px-3 py-1.5 rounded-full">
+                         <CheckCircle2 className="h-4 w-4 mr-1.5" /> Optimal Connection
+                       </div>
+                    ) : (
+                       <div className="flex items-center text-sm font-semibold text-rose-600 dark:text-rose-400 bg-rose-50 dark:bg-rose-500/10 px-3 py-1.5 rounded-full">
+                         <AlertCircle className="h-4 w-4 mr-1.5" /> Disconnected
+                       </div>
+                    )}
+                  </div>
+                  <button 
+                    className="px-4 py-2 bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 text-sm font-semibold rounded-lg shadow-sm transition-colors border border-slate-200/50 dark:border-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed flex items-center"
+                    onClick={() => handleSync(source.name, activeDomain)}
+                    disabled={syncingSource !== null || !source.isOnline}
+                  >
+                    {syncingSource === source.name ? (
+                      <><RefreshCw className="mr-2 h-4 w-4 animate-spin text-brand-500" /> Fetching</>
+                    ) : `Sync ${activeDomain}`}
+                  </button>
+                </div>
               </div>
             </CardContent>
 
@@ -129,7 +140,6 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
           </Card>
         ))}
       </div>
-      )}
 
       <div className="pt-4">
         <h2 className="text-xl font-bold tracking-tight text-slate-800 dark:text-slate-100 flex items-center gap-2 mb-6">
@@ -158,38 +168,52 @@ export function SourcesView({ initialViewModel }: SourcesViewProps) {
                     </td>
                   </tr>
                 ) : (
-                  viewModel.logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
-                      <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400 font-medium font-mono text-xs">
-                        {new Date(log.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'medium' })}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap font-semibold text-slate-800 dark:text-slate-200">
-                        {log.sourceName}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
-                          {log.triggeredBy}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center text-slate-600 dark:text-slate-300 font-bold">
-                        {log.recordsProcessed}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-xs text-slate-500 dark:text-slate-400">
-                        {log.durationMs}ms
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {log.status === 'success' ? (
-                          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" title="Success">
-                            <CheckCircle2 className="w-4 h-4" />
+                  viewModel.logs.map((log) => {
+                    // Parse "source:domain" format
+                    const parts = log.sourceName.split(':');
+                    const sourceLabel = parts[0];
+                    const domainLabel = parts[1];
+                    
+                    return (
+                      <tr key={log.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors group">
+                        <td className="px-6 py-4 whitespace-nowrap text-slate-600 dark:text-slate-400 font-medium font-mono text-xs">
+                          {new Date(log.createdAt).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'medium' })}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center gap-2">
+                            <span className="font-semibold text-slate-800 dark:text-slate-200">{sourceLabel}</span>
+                            {domainLabel && (
+                              <span className="px-1.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-bold uppercase rounded tracking-wider">
+                                {domainLabel}
+                              </span>
+                            )}
                           </div>
-                        ) : (
-                          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400" title={log.errorMessage}>
-                            <AlertCircle className="w-4 h-4" />
-                          </div>
-                        )}
-                      </td>
-                    </tr>
-                  ))
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span className="bg-slate-100 dark:bg-slate-800/80 text-slate-600 dark:text-slate-300 font-mono border border-slate-200 dark:border-slate-700 px-2 py-0.5 rounded text-[10px] uppercase tracking-wider">
+                            {log.triggeredBy}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center text-slate-600 dark:text-slate-300 font-bold">
+                          {log.recordsProcessed}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right font-mono text-xs text-slate-500 dark:text-slate-400">
+                          {log.durationMs}ms
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {log.status === 'success' ? (
+                            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400" title="Success">
+                              <CheckCircle2 className="w-4 h-4" />
+                            </div>
+                          ) : (
+                            <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-rose-100 dark:bg-rose-500/20 text-rose-600 dark:text-rose-400" title={log.errorMessage}>
+                              <AlertCircle className="w-4 h-4" />
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })
                 )}
               </tbody>
             </table>

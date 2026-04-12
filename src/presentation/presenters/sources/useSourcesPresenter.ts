@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { SourcesViewModel, SourcesDomain } from "./SourcesPresenter";
 import { createClientSourcesPresenter } from "./SourcesPresenterClientFactory";
+import { SyncDomain } from "@/src/application/use-cases/SyncFootballDataUseCase";
 
 export function useSourcesPresenter(initialViewModel?: SourcesViewModel) {
   const [viewModel, setViewModel] = useState<SourcesViewModel | null>(initialViewModel || null);
@@ -30,12 +31,12 @@ export function useSourcesPresenter(initialViewModel?: SourcesViewModel) {
     }
   }, [initialViewModel, loadData]);
 
-  const handleSync = async (sourceName: string) => {
+  const handleSync = async (sourceName: string, domain?: SyncDomain) => {
     setSyncingSource(sourceName);
     setError(null);
     try {
       const presenter = createClientSourcesPresenter();
-      await presenter.triggerManualSync(sourceName);
+      await presenter.triggerManualSync(sourceName, domain || activeDomain as SyncDomain);
       // Reload logs after sync
       await loadData();
     } catch (e: any) {
