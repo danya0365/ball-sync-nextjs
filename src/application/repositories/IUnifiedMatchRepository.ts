@@ -16,6 +16,10 @@ export interface UnifiedMatch {
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   matchStage?: string;
   groupName?: string;
+  matchday?: number;
+  season?: string;
+  refereeName?: string;
+  venueName?: string;
   score: {
     home: number | null;
     away: number | null;
@@ -25,6 +29,8 @@ export interface UnifiedMatch {
     extraTimeAway?: number | null;
     penaltiesHome?: number | null;
     penaltiesAway?: number | null;
+    winner?: string | null;
+    duration?: string | null;
   };
   lastUpdatedBySource: string;
   updatedAt: string;

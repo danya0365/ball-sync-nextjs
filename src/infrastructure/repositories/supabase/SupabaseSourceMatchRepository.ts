@@ -58,6 +58,12 @@ export class SupabaseSourceMatchRepository implements ISourceMatchRepository {
         penalties_away: match.score.penaltiesAway,
         match_stage: match.stage,
         group_name: match.group,
+        matchday: match.matchday,
+        season: match.season,
+        score_winner: match.score.winner,
+        score_duration: match.score.duration,
+        referee_name: match.referee,
+        venue_name: match.venue,
         unified_match_id: unifiedMatchId,
         raw_data: match as any,
         updated_at: new Date().toISOString()
@@ -89,6 +95,12 @@ export class SupabaseSourceMatchRepository implements ISourceMatchRepository {
       status: row.status,
       matchStage: row.match_stage,
       groupName: row.group_name,
+      matchday: row.matchday,
+      season: row.season,
+      scoreWinner: row.score_winner,
+      scoreDuration: row.score_duration,
+      refereeName: row.referee_name,
+      venueName: row.venue_name,
       unifiedMatchId: row.unified_match_id,
       rawData: row.raw_data
     };

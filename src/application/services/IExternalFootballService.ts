@@ -11,10 +11,16 @@ export interface NormalizedMatch {
   leagueExternalId?: string;
   stage?: string;
   group?: string;
+  matchday?: number;
+  season?: string;
+  referee?: string;
+  venue?: string;
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   score: {
     home: number | null;
     away: number | null;
+    winner?: string | null;
+    duration?: string | null;
     halfTimeHome?: number | null;
     halfTimeAway?: number | null;
     extraTimeHome?: number | null;

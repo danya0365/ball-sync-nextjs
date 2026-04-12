@@ -130,6 +130,12 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
       penalties_away: match.score?.penaltiesAway,
       match_stage: match.matchStage,
       group_name: match.groupName,
+      matchday: match.matchday,
+      season: match.season,
+      score_winner: match.score?.winner,
+      score_duration: match.score?.duration,
+      referee_name: match.refereeName,
+      venue_name: match.venueName,
       last_updated_by_source: match.lastUpdatedBySource,
       is_approved: match.isApproved,
       updated_at: new Date().toISOString()
@@ -179,6 +185,10 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
       status: row.status,
       matchStage: row.match_stage ?? undefined,
       groupName: row.group_name ?? undefined,
+      matchday: row.matchday ?? undefined,
+      season: row.season ?? undefined,
+      refereeName: row.referee_name ?? undefined,
+      venueName: row.venue_name ?? undefined,
       score: {
         home: row.home_score,
         away: row.away_score,
@@ -187,7 +197,9 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
         extraTimeHome: row.extra_time_home ?? undefined,
         extraTimeAway: row.extra_time_away ?? undefined,
         penaltiesHome: row.penalties_home ?? undefined,
-        penaltiesAway: row.penalties_away ?? undefined
+        penaltiesAway: row.penalties_away ?? undefined,
+        winner: row.score_winner ?? undefined,
+        duration: row.score_duration ?? undefined
       },
       lastUpdatedBySource: row.last_updated_by_source || 'Unknown',
       isApproved: row.is_approved || false,

@@ -10,7 +10,10 @@ export interface TheSportsDbEvent {
   dateEvent?: string;
   strStatus?: string;
   strRound?: string;
+  intRound?: string;
   strSeason?: string;
+  strVenue?: string;
+  strReferee?: string;
   intHomeScore?: string;
   intAwayScore?: string;
 }
@@ -124,7 +127,12 @@ export class TheSportsDbService implements IExternalFootballService {
         matchDate: event.strTimestamp || event.dateEvent || new Date().toISOString(),
         status: this.mapStatus(event.strStatus),
         stage: event.strRound,
+        matchday: event.intRound ? parseInt(event.intRound, 10) : undefined,
+        season: event.strSeason,
+        venue: event.strVenue,
+        referee: event.strReferee,
         score: {
+          winner: this.determineWinner(event.intHomeScore, event.intAwayScore),
           home: event.intHomeScore ? parseInt(event.intHomeScore, 10) : null,
           away: event.intAwayScore ? parseInt(event.intAwayScore, 10) : null,
           halfTimeHome: null, 
@@ -135,6 +143,16 @@ export class TheSportsDbService implements IExternalFootballService {
       console.error(`[${this.getSourceName()}] fetchLiveMatches error:`, error);
       throw error;
     }
+  }
+
+  private determineWinner(home?: string, away?: string): string | undefined {
+    if (!home || !away) return undefined;
+    const h = parseInt(home, 10);
+    const a = parseInt(away, 10);
+    if (isNaN(h) || isNaN(a)) return undefined;
+    if (h > a) return 'HOME_TEAM';
+    if (a > h) return 'AWAY_TEAM';
+    return 'DRAW';
   }
 
   async fetchLeagues(): Promise<NormalizedLeague[]> {

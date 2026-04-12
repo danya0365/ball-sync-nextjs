@@ -260,13 +260,19 @@ export type Database = {
           id: string
           match_date: string | null
           match_stage: string | null
+          matchday: number | null
           penalties_away: number | null
           penalties_home: number | null
           raw_data: Json | null
+          referee_name: string | null
+          score_duration: string | null
+          score_winner: string | null
+          season: string | null
           source_name: string
           status: string | null
           unified_match_id: string | null
           updated_at: string | null
+          venue_name: string | null
         }
         Insert: {
           away_score?: number | null
@@ -283,13 +289,19 @@ export type Database = {
           id?: string
           match_date?: string | null
           match_stage?: string | null
+          matchday?: number | null
           penalties_away?: number | null
           penalties_home?: number | null
           raw_data?: Json | null
+          referee_name?: string | null
+          score_duration?: string | null
+          score_winner?: string | null
+          season?: string | null
           source_name: string
           status?: string | null
           unified_match_id?: string | null
           updated_at?: string | null
+          venue_name?: string | null
         }
         Update: {
           away_score?: number | null
@@ -306,13 +318,19 @@ export type Database = {
           id?: string
           match_date?: string | null
           match_stage?: string | null
+          matchday?: number | null
           penalties_away?: number | null
           penalties_home?: number | null
           raw_data?: Json | null
+          referee_name?: string | null
+          score_duration?: string | null
+          score_winner?: string | null
+          season?: string | null
           source_name?: string
           status?: string | null
           unified_match_id?: string | null
           updated_at?: string | null
+          venue_name?: string | null
         }
         Relationships: [
           {
@@ -558,11 +576,17 @@ export type Database = {
           league_name_th: string | null
           match_date: string
           match_stage: string | null
+          matchday: number | null
           metadata: Json | null
           penalties_away: number | null
           penalties_home: number | null
+          referee_name: string | null
+          score_duration: string | null
+          score_winner: string | null
+          season: string | null
           status: Database["public"]["Enums"]["match_status"]
           updated_at: string | null
+          venue_name: string | null
         }
         Insert: {
           away_score?: number | null
@@ -584,11 +608,17 @@ export type Database = {
           league_name_th?: string | null
           match_date: string
           match_stage?: string | null
+          matchday?: number | null
           metadata?: Json | null
           penalties_away?: number | null
           penalties_home?: number | null
+          referee_name?: string | null
+          score_duration?: string | null
+          score_winner?: string | null
+          season?: string | null
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string | null
+          venue_name?: string | null
         }
         Update: {
           away_score?: number | null
@@ -610,11 +640,17 @@ export type Database = {
           league_name_th?: string | null
           match_date?: string
           match_stage?: string | null
+          matchday?: number | null
           metadata?: Json | null
           penalties_away?: number | null
           penalties_home?: number | null
+          referee_name?: string | null
+          score_duration?: string | null
+          score_winner?: string | null
+          season?: string | null
           status?: Database["public"]["Enums"]["match_status"]
           updated_at?: string | null
+          venue_name?: string | null
         }
         Relationships: []
       }

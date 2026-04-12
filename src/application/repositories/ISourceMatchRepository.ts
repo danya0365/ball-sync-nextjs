@@ -20,6 +20,12 @@ export interface SourceMatch {
   status?: string | null;
   matchStage?: string | null;
   groupName?: string | null;
+  matchday?: number | null;
+  season?: string | null;
+  scoreWinner?: string | null;
+  scoreDuration?: string | null;
+  refereeName?: string | null;
+  venueName?: string | null;
   unifiedMatchId?: string | null;
   rawData?: any;
 }

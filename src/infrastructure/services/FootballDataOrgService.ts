@@ -6,15 +6,21 @@ export interface FootballDataMatch {
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   stage?: string;
   group?: string;
+  matchday?: number;
+  season?: { startDate: string; endDate: string };
   homeTeam?: { name: string };
   awayTeam?: { name: string };
   competition?: { id: number; name: string };
   score?: {
+    winner?: string;
+    duration?: string;
     fullTime?: { home: number | null, away: number | null };
     halfTime?: { home: number | null, away: number | null };
     extraTime?: { home: number | null, away: number | null };
     penalties?: { home: number | null, away: number | null };
   };
+  referees?: { name: string }[];
+  venue?: { name: string };
 }
 
 export interface FootballDataResponse {
@@ -121,8 +127,14 @@ export class FootballDataOrgService implements IExternalFootballService {
         matchDate: m.utcDate,
         stage: m.stage,
         group: m.group,
+        matchday: m.matchday,
+        season: m.season ? `${m.season.startDate.split('-')[0]}-${m.season.endDate.split('-')[0]}` : undefined,
+        referee: m.referees?.[0]?.name,
+        venue: m.venue?.name,
         status: m.status,
         score: {
+          winner: m.score?.winner,
+          duration: m.score?.duration,
           home: m.score?.fullTime?.home ?? null,
           away: m.score?.fullTime?.away ?? null,
           halfTimeHome: m.score?.halfTime?.home ?? null,
