@@ -1,4 +1,4 @@
-import { IUnifiedMatchRepository, UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
+import { IUnifiedMatchRepository, UnifiedMatch, UnifiedMatchQuery, UnifiedMatchQueryResult } from "@/src/application/repositories/IUnifiedMatchRepository";
 
 /**
  * ApiUnifiedMatchRepository
@@ -7,9 +7,38 @@ import { IUnifiedMatchRepository, UnifiedMatch } from "@/src/application/reposit
 export class ApiUnifiedMatchRepository implements IUnifiedMatchRepository {
   private baseUrl = '/api/services/matches/unified';
 
-  async getAll(): Promise<UnifiedMatch[]> {
-    const res = await fetch(this.baseUrl);
-    if (!res.ok) throw new Error("Failed to load unified matches");
+  async query(params: UnifiedMatchQuery): Promise<UnifiedMatchQueryResult> {
+    const searchParams = new URLSearchParams();
+    
+    if (params.filters) {
+      if (params.filters.status) {
+        if (Array.isArray(params.filters.status)) {
+          params.filters.status.forEach(status => searchParams.append('status', status));
+        } else {
+          searchParams.append('status', params.filters.status);
+        }
+      }
+      if (params.filters.isApproved !== undefined) {
+        searchParams.set('isApproved', String(params.filters.isApproved));
+      }
+    }
+
+    if (params.dateRange) {
+      searchParams.set('startDate', params.dateRange.startDate);
+      searchParams.set('endDate', params.dateRange.endDate);
+    }
+
+    if (params.search) searchParams.set('search', params.search);
+    if (params.sortBy) searchParams.set('sortBy', params.sortBy);
+    if (params.sortOrder) searchParams.set('sortOrder', params.sortOrder);
+    if (params.pagination) {
+      searchParams.set('limit', String(params.pagination.limit));
+      if (params.pagination.offset) searchParams.set('offset', String(params.pagination.offset));
+    }
+
+    const query = searchParams.toString();
+    const res = await fetch(`${this.baseUrl}${query ? `?${query}` : ''}`);
+    if (!res.ok) throw new Error("Failed to load unified matches query");
     return res.json();
   }
 
@@ -17,13 +46,6 @@ export class ApiUnifiedMatchRepository implements IUnifiedMatchRepository {
     const res = await fetch(`${this.baseUrl}/${id}`);
     if (res.status === 404) return null;
     if (!res.ok) throw new Error("Failed to load match");
-    return res.json();
-  }
-
-  async findMatchesByDateRange(startDate: string, endDate: string): Promise<UnifiedMatch[]> {
-    const query = new URLSearchParams({ startDate, endDate }).toString();
-    const res = await fetch(`${this.baseUrl}?${query}`);
-    if (!res.ok) throw new Error("Failed to find matches by date range");
     return res.json();
   }
 

@@ -88,10 +88,13 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
       // Note: For simplicity on the client side without complex date math, we query the exact day string.
       // E.g. 2026-04-12T00:00:00Z -> we can slice to YYYY-MM-DD
       const dateOnly = match.matchDate.split('T')[0];
-      const possibleMatches = await this.unifiedMatchRepository.findMatchesByDateRange(
-        `${dateOnly}T00:00:00.000Z`, 
-        `${dateOnly}T23:59:59.999Z`
-      );
+      const startDate = `${dateOnly}T00:00:00.000Z`;
+      const endDate = `${dateOnly}T23:59:59.999Z`;
+      const existingMatchesResult = await this.unifiedMatchRepository.query({
+        dateRange: { startDate, endDate },
+        pagination: { limit: 1000 }
+      });
+      const possibleMatches = existingMatchesResult.data;
 
       // We use dynamic import for the utility to ensure it works nicely in client & server
       const { calculateSimilarity } = await import('@/src/infrastructure/utils/stringSimilarity');

@@ -1,4 +1,4 @@
-import { IUnifiedMatchRepository, UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
+import { IUnifiedMatchRepository, UnifiedMatch, UnifiedMatchQuery, UnifiedMatchQueryResult } from "@/src/application/repositories/IUnifiedMatchRepository";
 import { Database } from "@/src/domain/types/supabase";
 import { SupabaseClient } from "@supabase/supabase-js";
 
@@ -14,14 +14,51 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
 
   constructor(private readonly supabase: SupabaseClient<Database>) {}
 
-  async getAll(): Promise<UnifiedMatch[]> {
-    const { data, error } = await this.supabase
-      .from('unified_matches')
-      .select('*')
-      .order('match_date', { ascending: true });
-    
+  async query(params: UnifiedMatchQuery): Promise<UnifiedMatchQueryResult> {
+    let q = this.supabase.from('unified_matches').select('*', { count: 'exact' });
+
+    // 1. Filters
+    if (params.filters) {
+      if (params.filters.status) {
+        const statuses = Array.isArray(params.filters.status) ? params.filters.status : [params.filters.status];
+        q = q.in('status', statuses as Database['public']['Enums']['match_status'][]);
+      }
+      if (params.filters.isApproved !== undefined) {
+        q = q.eq('is_approved', params.filters.isApproved);
+      }
+    }
+
+    // 2. Date Range
+    if (params.dateRange) {
+      q = q.gte('match_date', params.dateRange.startDate)
+           .lte('match_date', params.dateRange.endDate);
+    }
+
+    // 3. Search (Search across team names locally with ilike)
+    if (params.search) {
+      q = q.or(`home_team_name_en.ilike.%${params.search}%,away_team_name_en.ilike.%${params.search}%`);
+    }
+
+    // 4. Sort
+    const sortBy = params.sortBy || 'match_date';
+    const ascending = params.sortOrder === 'asc';
+    q = q.order(sortBy, { ascending });
+
+    // 5. Pagination
+    if (params.pagination) {
+      const limit = params.pagination.limit;
+      const offset = params.pagination.offset || 0;
+      q = q.range(offset, offset + limit - 1);
+    }
+
+    const { data, error, count } = await q;
+
     if (error) throw new Error(error.message);
-    return (data || []).map(this.mapToUnifiedMatch);
+
+    return {
+      data: (data || []).map(this.mapToUnifiedMatch.bind(this)),
+      total: count || 0
+    };
   }
 
   async getById(id: string): Promise<UnifiedMatch | null> {
@@ -33,18 +70,6 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
 
     if (error && error.code !== 'PGRST116') throw new Error(error.message);
     return data ? this.mapToUnifiedMatch(data) : null;
-  }
-
-  async findMatchesByDateRange(startDate: string, endDate: string): Promise<UnifiedMatch[]> {
-    const { data, error } = await this.supabase
-      .from('unified_matches')
-      .select('*')
-      .gte('match_date', startDate)
-      .lte('match_date', endDate)
-      .order('match_date', { ascending: true });
-
-    if (error) throw new Error(error.message);
-    return (data || []).map(this.mapToUnifiedMatch.bind(this));
   }
 
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {

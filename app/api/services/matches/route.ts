@@ -15,8 +15,8 @@ export async function GET(request: Request) {
     if (!sourceName) {
       const supabase = createAdminSupabaseClient();
       const repo = new SupabaseUnifiedMatchRepository(supabase);
-      const matches = await repo.getAll();
-      return NextResponse.json(matches);
+      const result = await repo.query({ pagination: { limit: 100 } });
+      return NextResponse.json(result.data);
     }
 
     // If source specified, fetch raw data from external service

@@ -1,10 +1,14 @@
 import { DashboardPresenter } from "./DashboardPresenter";
 import { MockDashboardRepository } from "@/src/infrastructure/repositories/mock/MockDashboardRepository";
+import { SupabaseUnifiedMatchRepository } from "@/src/infrastructure/repositories/supabase/SupabaseUnifiedMatchRepository";
+import { createAdminSupabaseClient } from "@/src/infrastructure/supabase/admin";
 
 export class DashboardPresenterServerFactory {
   static create(): DashboardPresenter {
     const repository = new MockDashboardRepository();
-    return new DashboardPresenter(repository);
+    const supabaseClient = createAdminSupabaseClient();
+    const matchRepository = new SupabaseUnifiedMatchRepository(supabaseClient);
+    return new DashboardPresenter(repository, matchRepository);
   }
 }
 
