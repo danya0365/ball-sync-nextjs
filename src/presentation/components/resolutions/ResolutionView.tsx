@@ -107,6 +107,7 @@ export function ResolutionView({ initialViewModel }: ResolutionViewProps) {
                   </CardHeader>
                   <CardContent className="space-y-3">
                     <div className="flex flex-wrap gap-2 text-xs">
+                      {match.leagueNameEn && <span className="bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded font-bold">{match.leagueNameEn}</span>}
                       <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">{match.status}</span>
                       <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">
                         {new Date(match.matchDate).toLocaleDateString()}

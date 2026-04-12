@@ -4,6 +4,8 @@ export interface TheSportsDbEvent {
   idEvent: string;
   strHomeTeam: string;
   strAwayTeam: string;
+  idLeague?: string;
+  strLeague?: string;
   strTimestamp?: string;
   dateEvent?: string;
   strStatus?: string;
@@ -115,6 +117,8 @@ export class TheSportsDbService implements IExternalFootballService {
         sourceName: this.getSourceName(),
         homeTeam: event.strHomeTeam,
         awayTeam: event.strAwayTeam,
+        leagueName: event.strLeague,
+        leagueExternalId: event.idLeague,
         matchDate: event.strTimestamp || event.dateEvent || new Date().toISOString(),
         status: this.mapStatus(event.strStatus),
         score: {

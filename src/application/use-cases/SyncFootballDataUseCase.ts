@@ -167,6 +167,7 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
         
         await this.unifiedMatchRepository.upsert({
           id: unifiedId,
+          leagueNameEn: match.leagueName,
           status: match.status,
           score: match.score,
           lastUpdatedBySource: match.sourceName,
@@ -176,6 +177,7 @@ export class SyncFootballDataUseCase implements ISyncFootballDataUseCase {
         const isTrusted = match.sourceName === 'football-data.org';
         
         const unifiedMatch = await this.unifiedMatchRepository.upsert({
+          leagueNameEn: match.leagueName,
           homeTeamNameEn: match.homeTeam,
           awayTeamNameEn: match.awayTeam,
           matchDate: match.matchDate,

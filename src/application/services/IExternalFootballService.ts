@@ -7,6 +7,8 @@ export interface NormalizedMatch {
   homeTeam: string;
   awayTeam: string;
   matchDate: string;
+  leagueName?: string;
+  leagueExternalId?: string;
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   score: {
     home: number | null;

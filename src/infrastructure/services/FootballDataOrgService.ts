@@ -6,6 +6,7 @@ export interface FootballDataMatch {
   status: 'SCHEDULED' | 'TIMED' | 'IN_PLAY' | 'PAUSED' | 'EXTRA_TIME' | 'PENALTY_SHOOTOUT' | 'FINISHED' | 'SUSPENDED' | 'POSTPONED' | 'CANCELLED' | 'AWARDED';
   homeTeam?: { name: string };
   awayTeam?: { name: string };
+  competition?: { id: number; name: string };
   score?: {
     fullTime?: { home: number | null, away: number | null };
     halfTime?: { home: number | null, away: number | null };
@@ -111,6 +112,8 @@ export class FootballDataOrgService implements IExternalFootballService {
         sourceName: this.getSourceName(),
         homeTeam: m.homeTeam?.name || 'Unknown',
         awayTeam: m.awayTeam?.name || 'Unknown',
+        leagueName: m.competition?.name,
+        leagueExternalId: m.competition?.id?.toString(),
         matchDate: m.utcDate,
         status: m.status,
         score: {

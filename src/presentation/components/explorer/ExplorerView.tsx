@@ -110,6 +110,7 @@ export function ExplorerView() {
                 <tr>
                   <th className="px-5 py-4 font-semibold">ID</th>
                   <th className="px-5 py-4 font-semibold">Match Date</th>
+                  <th className="px-5 py-4 font-semibold">League</th>
                   <th className="px-5 py-4 font-semibold">Home Team</th>
                   <th className="px-5 py-4 font-semibold">Away Team</th>
                   <th className="px-5 py-4 font-semibold">Status</th>
@@ -123,6 +124,7 @@ export function ExplorerView() {
                   <tr key={m.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/30 transition-colors">
                     <td className="px-5 py-3 font-mono text-[10px] text-slate-400 truncate max-w-[80px]" title={m.id}>{m.id}</td>
                     <td className="px-5 py-3 text-slate-600 dark:text-slate-300">{new Date(m.matchDate).toLocaleString()}</td>
+                    <td className="px-5 py-3 text-slate-600 dark:text-slate-400 text-xs font-semibold">{m.leagueNameEn || '-'}</td>
                     <td className="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200">{m.homeTeamNameEn}</td>
                     <td className="px-5 py-3 font-semibold text-slate-800 dark:text-slate-200">{m.awayTeamNameEn}</td>
                     <td className="px-5 py-3">
@@ -144,6 +146,7 @@ export function ExplorerView() {
                   <th className="px-5 py-4 font-semibold">Source Name</th>
                   <th className="px-5 py-4 font-semibold">External ID</th>
                   <th className="px-5 py-4 font-semibold">Match Date</th>
+                  <th className="px-5 py-4 font-semibold">Competition</th>
                   <th className="px-5 py-4 font-semibold">Home Team</th>
                   <th className="px-5 py-4 font-semibold">Away Team</th>
                   <th className="px-5 py-4 font-semibold">Unified Target</th>
@@ -157,6 +160,7 @@ export function ExplorerView() {
                     <td className="px-5 py-3 font-semibold text-slate-700 dark:text-slate-300">{s.sourceName}</td>
                     <td className="px-5 py-3 font-mono text-xs text-slate-500">{s.externalId}</td>
                     <td className="px-5 py-3 text-slate-600 dark:text-slate-400">{s.matchDate ? new Date(s.matchDate).toLocaleString() : '-'}</td>
+                    <td className="px-5 py-3 text-slate-600 dark:text-slate-400 text-xs">{s.rawData?.leagueName || '-'}</td>
                     <td className="px-5 py-3 text-slate-800 dark:text-slate-200">{s.homeTeamName || '-'}</td>
                     <td className="px-5 py-3 text-slate-800 dark:text-slate-200">{s.awayTeamName || '-'}</td>
                     <td className="px-5 py-3">
