@@ -1,18 +1,35 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { createClientExplorerPresenter } from "./ExplorerPresenterClientFactory";
 import { ExplorerDomain, ExplorerTableType } from "./ExplorerPresenter";
 
 import { UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
 import { SourceMatch } from "@/src/application/repositories/ISourceMatchRepository";
+import { UnifiedTeam } from "@/src/application/repositories/IUnifiedTeamRepository";
+import { SourceTeam } from "@/src/application/repositories/ISourceTeamRepository";
+import { UnifiedLeague } from "@/src/application/repositories/IUnifiedLeagueRepository";
+import { SourceLeague } from "@/src/application/repositories/ISourceLeagueRepository";
+import { UnifiedPlayer } from "@/src/application/repositories/IUnifiedPlayerRepository";
+import { SourcePlayer } from "@/src/application/repositories/ISourcePlayerRepository";
 
 export function useExplorerPresenter() {
   const [activeDomain, setActiveDomain] = useState<ExplorerDomain>('matches');
   const [activeTable, setActiveTable] = useState<ExplorerTableType>('unified');
   
+  // Matches
   const [unifiedMatches, setUnifiedMatches] = useState<UnifiedMatch[]>([]);
   const [sourceMatches, setSourceMatches] = useState<SourceMatch[]>([]);
+  // Teams
+  const [unifiedTeams, setUnifiedTeams] = useState<UnifiedTeam[]>([]);
+  const [sourceTeams, setSourceTeams] = useState<SourceTeam[]>([]);
+  // Leagues
+  const [unifiedLeagues, setUnifiedLeagues] = useState<UnifiedLeague[]>([]);
+  const [sourceLeagues, setSourceLeagues] = useState<SourceLeague[]>([]);
+  // Players
+  const [unifiedPlayers, setUnifiedPlayers] = useState<UnifiedPlayer[]>([]);
+  const [sourcePlayers, setSourcePlayers] = useState<SourcePlayer[]>([]);
+
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -33,25 +50,46 @@ export function useExplorerPresenter() {
         if (table === 'unified') {
           setUnifiedMatches([]);
           const res = await presenter.loadUnifiedMatches(p, limit);
-          if (requestId === requestRef.current) {
-            setUnifiedMatches(res.data);
-            setTotal(res.total);
-          }
-        } else if (table === 'source') {
+          if (requestId === requestRef.current) { setUnifiedMatches(res.data); setTotal(res.total); }
+        } else {
           setSourceMatches([]);
           const res = await presenter.loadSourceMatches(p, limit);
-          if (requestId === requestRef.current) {
-            setSourceMatches(res.data);
-            setTotal(res.total);
-          }
+          if (requestId === requestRef.current) { setSourceMatches(res.data); setTotal(res.total); }
         }
       } else if (domain === 'teams') {
-        // Future extensions...
-        setTotal(0);
+        if (table === 'unified') {
+          setUnifiedTeams([]);
+          const res = await presenter.loadUnifiedTeams(p, limit);
+          if (requestId === requestRef.current) { setUnifiedTeams(res.data); setTotal(res.total); }
+        } else {
+          setSourceTeams([]);
+          const res = await presenter.loadSourceTeams(p, limit);
+          if (requestId === requestRef.current) { setSourceTeams(res.data); setTotal(res.total); }
+        }
+      } else if (domain === 'leagues') {
+        if (table === 'unified') {
+          setUnifiedLeagues([]);
+          const res = await presenter.loadUnifiedLeagues(p, limit);
+          if (requestId === requestRef.current) { setUnifiedLeagues(res.data); setTotal(res.total); }
+        } else {
+          setSourceLeagues([]);
+          const res = await presenter.loadSourceLeagues(p, limit);
+          if (requestId === requestRef.current) { setSourceLeagues(res.data); setTotal(res.total); }
+        }
+      } else if (domain === 'players') {
+        if (table === 'unified') {
+          setUnifiedPlayers([]);
+          const res = await presenter.loadUnifiedPlayers(p, limit);
+          if (requestId === requestRef.current) { setUnifiedPlayers(res.data); setTotal(res.total); }
+        } else {
+          setSourcePlayers([]);
+          const res = await presenter.loadSourcePlayers(p, limit);
+          if (requestId === requestRef.current) { setSourcePlayers(res.data); setTotal(res.total); }
+        }
       }
     } catch (e) {
       if (requestId === requestRef.current) {
-        setError(`Failed to load ${domain} -> ${table}`);
+        setError(`Failed to load ${domain} → ${table}`);
         setTotal(0);
       }
     } finally {
@@ -65,7 +103,6 @@ export function useExplorerPresenter() {
     loadData(activeDomain, activeTable, page);
   }, [activeDomain, activeTable, page, loadData]);
 
-  // Handle Domain/Table change to reset page
   const handleDomainChange = (domain: ExplorerDomain) => {
     setActiveDomain(domain);
     setPage(1);
@@ -81,14 +118,12 @@ export function useExplorerPresenter() {
     setActiveDomain: handleDomainChange,
     activeTable,
     setActiveTable: handleTableChange,
-    unifiedMatches,
-    sourceMatches,
-    total,
-    page,
-    setPage,
-    loading,
-    error,
-    limit,
+    unifiedMatches, sourceMatches,
+    unifiedTeams, sourceTeams,
+    unifiedLeagues, sourceLeagues,
+    unifiedPlayers, sourcePlayers,
+    total, page, setPage,
+    loading, error, limit,
     refresh: () => loadData(activeDomain, activeTable, page)
   };
 }

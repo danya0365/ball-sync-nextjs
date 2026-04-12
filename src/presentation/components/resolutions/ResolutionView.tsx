@@ -1,152 +1,258 @@
 "use client";
 
-import { useState } from "react";
-import { useResolutionPresenter } from "../../presenters/resolutions/useResolutionPresenter";
-import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
-import { CheckCircle, ShieldAlert, Clock, Info, GitMerge } from "lucide-react";
+import { useResolutionPresenter } from "@/src/presentation/presenters/resolutions/useResolutionPresenter";
+import { ResolutionDomain, ResolutionViewModel } from "@/src/presentation/presenters/resolutions/ResolutionPresenter";
+import { Card, CardContent, CardHeader, CardTitle } from "@/src/presentation/components/ui/Card";
+import { CheckCircle2, AlertCircle, ShieldCheck, Database, Trophy, Shield, Users } from "lucide-react";
 
-import { ResolutionViewModel, ResolutionDomain } from "../../presenters/resolutions/ResolutionPresenter";
-import { MergeMatchModal } from "./MergeMatchModal";
-import { UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
-
-const DOMAINS: { id: ResolutionDomain, label: string, disabled?: boolean }[] = [
-  { id: 'matches', label: 'Matches' },
-  { id: 'teams', label: 'Teams', disabled: true },
-  { id: 'leagues', label: 'Leagues', disabled: true },
-  { id: 'players', label: 'Players', disabled: true },
+const DOMAINS: { id: ResolutionDomain, label: string, icon: React.ReactNode }[] = [
+  { id: 'matches', label: 'Matches', icon: <Trophy className="w-4 h-4" /> },
+  { id: 'teams', label: 'Teams', icon: <Shield className="w-4 h-4" /> },
+  { id: 'leagues', label: 'Leagues', icon: <Database className="w-4 h-4" /> },
+  { id: 'players', label: 'Players', icon: <Users className="w-4 h-4" /> },
 ];
 
-export function ResolutionView({ initialViewModel }: { initialViewModel?: ResolutionViewModel }) {
-  const { viewModel, loading, error, activeDomain, setActiveDomain, approveMatch, mergeMatches, fetchApprovedCandidates } = useResolutionPresenter(initialViewModel);
-  const [mergeTarget, setMergeTarget] = useState<UnifiedMatch | null>(null);
+interface ResolutionViewProps {
+  initialViewModel?: ResolutionViewModel;
+}
 
-  if (loading) {
-    return (
-      <div className="flex flex-col items-center justify-center p-12 text-slate-500 animate-pulse">
-        <ShieldAlert className="w-12 h-12 mb-4 text-slate-300" />
-        <p>Scanning unverified matches...</p>
+export function ResolutionView({ initialViewModel }: ResolutionViewProps) {
+  const {
+    viewModel, loading, error,
+    activeDomain, setActiveDomain,
+    approveMatch, approveTeam, approveLeague, approvePlayer
+  } = useResolutionPresenter(initialViewModel);
+
+  if (loading || !viewModel) {
+    return <div className="animate-pulse space-y-4 p-4">
+      <div className="h-10 bg-slate-200/50 dark:bg-slate-800/50 rounded-xl w-1/3"></div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {[1, 2, 3].map(i => <div key={i} className="h-40 bg-slate-200/50 dark:bg-slate-800/50 backdrop-blur-md rounded-2xl"></div>)}
       </div>
-    );
+    </div>;
   }
 
-  if (error) {
-    return (
-      <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 p-4 rounded-xl border border-red-100 dark:border-red-900/50">
-        <p className="flex items-center gap-2"><ShieldAlert className="w-5 h-5" /> {error}</p>
-      </div>
-    );
-  }
+  const pendingCounts = {
+    matches: viewModel.pendingMatches.length,
+    teams: viewModel.pendingTeams.length,
+    leagues: viewModel.pendingLeagues.length,
+    players: viewModel.pendingPlayers.length,
+  };
 
-  const matches = viewModel?.pendingMatches || [];
+  const totalPending = Object.values(pendingCounts).reduce((a, b) => a + b, 0);
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent">
-          Resolution Center
-        </h1>
-        <div className="bg-amber-100 text-amber-700 dark:bg-amber-500/20 dark:text-amber-400 px-4 py-1.5 rounded-full text-sm font-semibold flex items-center gap-2">
-          <ShieldAlert className="w-4 h-4" />
-          {matches.length} Pending
+    <div className="space-y-8">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-800 to-slate-500 dark:from-white dark:to-slate-400 bg-clip-text text-transparent flex items-center gap-3">
+            <ShieldCheck className="w-8 h-8 text-brand-500" />
+            Resolution Center
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Review and approve pending records across all domains.
+            <span className="ml-2 bg-amber-100 dark:bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 rounded-full text-xs font-bold">
+              {totalPending} pending
+            </span>
+          </p>
         </div>
       </div>
 
-      <p className="text-slate-600 dark:text-slate-400 text-sm">
-        Review unverified matches pulled from sources. Approve to promote them to Golden Records, or Merge duplicate records together.
-      </p>
+      {error && (
+        <div className="p-4 rounded-xl bg-red-50/80 dark:bg-red-900/20 text-red-600 dark:text-red-400 border border-red-100 dark:border-red-900/50 backdrop-blur-md">
+          <AlertCircle className="inline w-4 h-4 mr-2" />{error}
+        </div>
+      )}
 
-      {/* Tier 1: Domain Selection */}
-      <div className="flex flex-wrap gap-2 mb-6">
+      {/* Domain Selection */}
+      <div className="flex flex-wrap gap-2">
         {DOMAINS.map(domain => (
           <button
             key={domain.id}
-            onClick={() => !domain.disabled && setActiveDomain(domain.id)}
-            disabled={domain.disabled}
-            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+            onClick={() => setActiveDomain(domain.id)}
+            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${
               activeDomain === domain.id
                 ? "bg-slate-800 dark:bg-white text-white dark:text-slate-900 shadow-md transform scale-105"
-                : domain.disabled
-                  ? "bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-dashed border-slate-300 dark:border-slate-700"
-                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+                : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
             }`}
           >
+            {domain.icon}
             {domain.label}
-            {domain.disabled && <span className="ml-2 text-[10px] font-normal uppercase tracking-wider opacity-60">Soon</span>}
+            {pendingCounts[domain.id] > 0 && (
+              <span className={`ml-1 px-1.5 py-0.5 rounded-full text-[10px] font-bold ${
+                activeDomain === domain.id
+                  ? "bg-white/20 text-white dark:bg-slate-900/30 dark:text-slate-900"
+                  : "bg-amber-100 dark:bg-amber-500/20 text-amber-700 dark:text-amber-400"
+              }`}>
+                {pendingCounts[domain.id]}
+              </span>
+            )}
           </button>
         ))}
       </div>
 
+      {/* ========== MATCHES ========== */}
       {activeDomain === 'matches' && (
-        matches.length === 0 ? (
-        <Card className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border-white/40 dark:border-white/5 border-dashed">
-          <CardContent className="flex flex-col items-center justify-center p-16 text-center text-slate-500">
-            <CheckCircle className="w-12 h-12 mb-4 text-green-400" />
-            <h3 className="text-lg font-semibold text-slate-700 dark:text-slate-300">All Caught Up!</h3>
-            <p className="text-sm mt-2 max-w-md">There are no pending matches requiring administrative approval. Everything looks clean and synced.</p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="grid gap-4">
-          {matches.map((match) => (
-            <Card key={match.id} className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border-white/50 dark:border-white/5 hover:bg-white/90 dark:hover:bg-slate-900/70 transition-all hover:shadow-lg group">
-              <CardContent className="p-5">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  
-                  {/* Info Block */}
-                  <div className="flex-1 space-y-2">
-                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-500 uppercase tracking-wider">
-                      <Clock className="w-3.5 h-3.5" />
-                      {new Date(match.matchDate).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' })}
-                      <span className="px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
-                        {match.status}
+        <div className="space-y-4">
+          {viewModel.pendingMatches.length === 0 ? (
+            <EmptyState text="No pending matches to review" />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {viewModel.pendingMatches.map(match => (
+                <Card key={match.id} className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100">
+                      {match.homeTeamNameEn} vs {match.awayTeamNameEn}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">{match.status}</span>
+                      <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">
+                        {new Date(match.matchDate).toLocaleDateString()}
+                      </span>
+                      <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold uppercase">
+                        {match.lastUpdatedBySource}
                       </span>
                     </div>
-                    
-                    <div className="flex items-center gap-4 text-lg">
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{match.homeTeamNameEn}</span>
-                      <span className="text-slate-400 dark:text-slate-500 text-sm font-medium">vs</span>
-                      <span className="font-bold text-slate-800 dark:text-slate-200">{match.awayTeamNameEn}</span>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => approveMatch(match.id)}
+                        className="flex-1 px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1"
+                      >
+                        <CheckCircle2 className="w-4 h-4" /> Approve
+                      </button>
                     </div>
-
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500">
-                      <Info className="w-3.5 h-3.5" /> Source: <span className="font-mono bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-[10px]">{match.lastUpdatedBySource}</span>
-                    </div>
-                  </div>
-
-                  {/* Action Block */}
-                  <div className="flex items-center gap-3">
-                    <button 
-                      onClick={() => approveMatch(match.id)}
-                      className="px-5 py-2.5 bg-brand-500 hover:bg-brand-600 text-white text-sm font-semibold rounded-xl shadow-lg shadow-brand-500/25 transition-all transform active:scale-95 flex items-center gap-2"
-                    >
-                      <CheckCircle className="w-4 h-4" />
-                      Approve Match
-                    </button>
-                    <button 
-                      onClick={() => setMergeTarget(match)}
-                      className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-xl transition-all flex items-center gap-2"
-                    >
-                      <GitMerge className="w-4 h-4" />
-                      Merge Into...
-                    </button>
-                  </div>
-
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
+      )}
 
-      {/* Merge Modal */}
-      {mergeTarget && (
-        <MergeMatchModal
-          duplicateMatch={mergeTarget}
-          onClose={() => setMergeTarget(null)}
-          onMerge={mergeMatches}
-          fetchApprovedCandidates={fetchApprovedCandidates}
-        />
+      {/* ========== TEAMS ========== */}
+      {activeDomain === 'teams' && (
+        <div className="space-y-4">
+          {viewModel.pendingTeams.length === 0 ? (
+            <EmptyState text="No pending teams to review" />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {viewModel.pendingTeams.map(team => (
+                <Card key={team.id} className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                      {team.crestUrl && <img src={team.crestUrl} alt="" className="w-6 h-6 object-contain" />}
+                      {team.nameEn}
+                      {team.tla && <span className="text-xs bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded font-mono">{team.tla}</span>}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {team.country && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">{team.country}</span>}
+                      {team.venueName && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">{team.venueName}</span>}
+                      <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold uppercase">
+                        {team.lastUpdatedBySource}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => approveTeam(team.id)}
+                      className="w-full px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Approve
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========== LEAGUES ========== */}
+      {activeDomain === 'leagues' && (
+        <div className="space-y-4">
+          {viewModel.pendingLeagues.length === 0 ? (
+            <EmptyState text="No pending leagues to review" />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {viewModel.pendingLeagues.map(league => (
+                <Card key={league.id} className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+                      {league.emblemUrl && <img src={league.emblemUrl} alt="" className="w-6 h-6 object-contain" />}
+                      {league.nameEn}
+                      {league.code && <span className="text-xs bg-brand-50 dark:bg-brand-500/10 text-brand-600 dark:text-brand-400 px-2 py-0.5 rounded font-bold">{league.code}</span>}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {league.country && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">{league.country}</span>}
+                      <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">{league.type}</span>
+                      <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold uppercase">
+                        {league.lastUpdatedBySource}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => approveLeague(league.id)}
+                      className="w-full px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Approve
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ========== PLAYERS ========== */}
+      {activeDomain === 'players' && (
+        <div className="space-y-4">
+          {viewModel.pendingPlayers.length === 0 ? (
+            <EmptyState text="No pending players to review. Player sync requires premium API access." />
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {viewModel.pendingPlayers.map(player => (
+                <Card key={player.id} className="bg-white/70 dark:bg-slate-900/50 backdrop-blur-md border border-white/50 dark:border-white/5 shadow-lg hover:shadow-xl transition-all">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-base font-bold text-slate-800 dark:text-slate-100">
+                      {player.nameEn}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div className="flex flex-wrap gap-2 text-xs">
+                      {player.position && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-600 dark:text-slate-300">{player.position}</span>}
+                      {player.nationality && <span className="bg-slate-100 dark:bg-slate-800 px-2 py-1 rounded text-slate-500 dark:text-slate-400">{player.nationality}</span>}
+                      <span className="bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 px-2 py-1 rounded text-[10px] font-bold uppercase">
+                        {player.lastUpdatedBySource}
+                      </span>
+                    </div>
+                    <button
+                      onClick={() => approvePlayer(player.id)}
+                      className="w-full px-3 py-2 bg-emerald-500 hover:bg-emerald-600 text-white text-sm font-semibold rounded-lg shadow-sm transition-colors flex items-center justify-center gap-1"
+                    >
+                      <CheckCircle2 className="w-4 h-4" /> Approve
+                    </button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+        </div>
       )}
     </div>
+  );
+}
+
+function EmptyState({ text }: { text: string }) {
+  return (
+    <Card className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border-white/40 dark:border-white/5 shadow-xl">
+      <div className="p-12 text-center">
+        <CheckCircle2 className="w-12 h-12 text-emerald-500 mx-auto mb-4 opacity-50" />
+        <p className="text-slate-500 font-medium">{text}</p>
+      </div>
+    </Card>
   );
 }

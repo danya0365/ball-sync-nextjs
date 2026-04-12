@@ -8,6 +8,7 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
   const [viewModel, setViewModel] = useState<ResolutionViewModel | null>(initialViewModel || null);
   const [loading, setLoading] = useState(!initialViewModel);
   const [error, setError] = useState<string | null>(null);
+  const [activeDomain, setActiveDomain] = useState<ResolutionDomain>('matches');
 
   const presenter = createClientResolutionPresenter();
 
@@ -29,6 +30,7 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
     }
   }, [initialViewModel, loadData]);
 
+  // ---- Matches ----
   const approveMatch = async (id: string) => {
     if (!viewModel) return false;
     
@@ -48,9 +50,7 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
 
   const mergeMatches = async (primaryId: string, duplicateId: string) => {
     if (!viewModel) return false;
-
     setViewModel({ ...viewModel, pendingMatches: viewModel.pendingMatches.filter(m => m.id !== duplicateId) });
-
     try {
       await presenter.mergeMatches(primaryId, duplicateId);
       return true;
@@ -64,7 +64,80 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
     return await presenter.getApprovedMatches(dateRange);
   };
 
-  const [activeDomain, setActiveDomain] = useState<ResolutionDomain>('matches');
+  // ---- Teams ----
+  const approveTeam = async (id: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingTeams: viewModel.pendingTeams.filter(t => t.id !== id) });
+    try {
+      await presenter.approveTeam(id);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  const mergeTeams = async (primaryId: string, duplicateId: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingTeams: viewModel.pendingTeams.filter(t => t.id !== duplicateId) });
+    try {
+      await presenter.mergeTeams(primaryId, duplicateId);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  // ---- Leagues ----
+  const approveLeague = async (id: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingLeagues: viewModel.pendingLeagues.filter(l => l.id !== id) });
+    try {
+      await presenter.approveLeague(id);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  const mergeLeagues = async (primaryId: string, duplicateId: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingLeagues: viewModel.pendingLeagues.filter(l => l.id !== duplicateId) });
+    try {
+      await presenter.mergeLeagues(primaryId, duplicateId);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  // ---- Players ----
+  const approvePlayer = async (id: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingPlayers: viewModel.pendingPlayers.filter(p => p.id !== id) });
+    try {
+      await presenter.approvePlayer(id);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  const mergePlayers = async (primaryId: string, duplicateId: string) => {
+    if (!viewModel) return false;
+    setViewModel({ ...viewModel, pendingPlayers: viewModel.pendingPlayers.filter(p => p.id !== duplicateId) });
+    try {
+      await presenter.mergePlayers(primaryId, duplicateId);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
 
   return {
     viewModel,
@@ -73,8 +146,18 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
     activeDomain,
     setActiveDomain,
     refresh: loadData,
+    // Match-specific
     approveMatch,
     mergeMatches,
-    fetchApprovedCandidates
+    fetchApprovedCandidates,
+    // Teams
+    approveTeam,
+    mergeTeams,
+    // Leagues
+    approveLeague,
+    mergeLeagues,
+    // Players
+    approvePlayer,
+    mergePlayers,
   };
 }
