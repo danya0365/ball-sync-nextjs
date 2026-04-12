@@ -82,6 +82,34 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
     return true;
   }
 
+  async mergeMatches(primaryId: string, duplicateId: string): Promise<boolean> {
+    // 1. Move all source linkages from Duplicate to Primary
+    const { error: sourceError } = await this.supabase
+      .from('source_matches')
+      .update({ unified_match_id: primaryId })
+      .eq('unified_match_id', duplicateId);
+    
+    if (sourceError) throw new Error(`Merge Error (Update Sources): ${sourceError.message}`);
+
+    // 2. Erase the Duplicate from Unified Matches
+    const { error: deleteError } = await this.supabase
+      .from('unified_matches')
+      .delete()
+      .eq('id', duplicateId);
+      
+    if (deleteError) throw new Error(`Merge Error (Delete Duplicate): ${deleteError.message}`);
+
+    // 3. Mark Primary as Approved
+    const { error: approveError } = await this.supabase
+      .from('unified_matches')
+      .update({ is_approved: true, updated_at: new Date().toISOString() })
+      .eq('id', primaryId);
+
+    if (approveError) throw new Error(`Merge Error (Approve Primary): ${approveError.message}`);
+
+    return true;
+  }
+
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {
     const payload: UnifiedMatchUpdate = {
       league_name_en: match.leagueNameEn,

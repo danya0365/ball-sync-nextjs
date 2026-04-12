@@ -1,13 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import { useResolutionPresenter } from "../../presenters/resolutions/useResolutionPresenter";
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
-import { CheckCircle, ShieldAlert, Clock, Info } from "lucide-react";
+import { CheckCircle, ShieldAlert, Clock, Info, GitMerge } from "lucide-react";
 
 import { ResolutionViewModel } from "../../presenters/resolutions/ResolutionPresenter";
+import { MergeMatchModal } from "./MergeMatchModal";
+import { UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
 
 export function ResolutionView({ initialViewModel }: { initialViewModel?: ResolutionViewModel }) {
-  const { viewModel, loading, error, approveMatch } = useResolutionPresenter(initialViewModel);
+  const { viewModel, loading, error, approveMatch, mergeMatches, fetchApprovedCandidates } = useResolutionPresenter(initialViewModel);
+  const [mergeTarget, setMergeTarget] = useState<UnifiedMatch | null>(null);
 
   if (loading) {
     return (
@@ -41,7 +45,7 @@ export function ResolutionView({ initialViewModel }: { initialViewModel?: Resolu
       </div>
 
       <p className="text-slate-600 dark:text-slate-400 text-sm">
-        Review unverified matches pulled from sources. Approve to promote them to Golden Records.
+        Review unverified matches pulled from sources. Approve to promote them to Golden Records, or Merge duplicate records together.
       </p>
 
       {matches.length === 0 ? (
@@ -89,7 +93,13 @@ export function ResolutionView({ initialViewModel }: { initialViewModel?: Resolu
                       <CheckCircle className="w-4 h-4" />
                       Approve Match
                     </button>
-                    {/* Discard button can be added later if needed */}
+                    <button 
+                      onClick={() => setMergeTarget(match)}
+                      className="px-5 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 text-sm font-semibold rounded-xl transition-all flex items-center gap-2"
+                    >
+                      <GitMerge className="w-4 h-4" />
+                      Merge Into...
+                    </button>
                   </div>
 
                 </div>
@@ -97,6 +107,16 @@ export function ResolutionView({ initialViewModel }: { initialViewModel?: Resolu
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Merge Modal */}
+      {mergeTarget && (
+        <MergeMatchModal
+          duplicateMatch={mergeTarget}
+          onClose={() => setMergeTarget(null)}
+          onMerge={mergeMatches}
+          fetchApprovedCandidates={fetchApprovedCandidates}
+        />
       )}
     </div>
   );

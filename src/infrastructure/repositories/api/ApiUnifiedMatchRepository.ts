@@ -59,6 +59,16 @@ export class ApiUnifiedMatchRepository implements IUnifiedMatchRepository {
     return true;
   }
 
+  async mergeMatches(primaryId: string, duplicateId: string): Promise<boolean> {
+    const res = await fetch(`${this.baseUrl}/merge`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ primaryId, duplicateId })
+    });
+    if (!res.ok) throw new Error("Failed to merge matches");
+    return true;
+  }
+
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {
     const res = await fetch(this.baseUrl, {
       method: 'POST',

@@ -32,7 +32,6 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
   const approveMatch = async (id: string) => {
     if (!viewModel) return false;
     
-    // Optimistic UI update
     setViewModel({
       ...viewModel,
       pendingMatches: viewModel.pendingMatches.filter(m => m.id !== id)
@@ -42,10 +41,27 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
       await presenter.approveMatch(id);
       return true;
     } catch (e) {
-      // Revert on failure
       loadData();
       return false;
     }
+  };
+
+  const mergeMatches = async (primaryId: string, duplicateId: string) => {
+    if (!viewModel) return false;
+
+    setViewModel({ ...viewModel, pendingMatches: viewModel.pendingMatches.filter(m => m.id !== duplicateId) });
+
+    try {
+      await presenter.mergeMatches(primaryId, duplicateId);
+      return true;
+    } catch (e) {
+      loadData();
+      return false;
+    }
+  };
+
+  const fetchApprovedCandidates = async (dateRange?: { startDate: string, endDate: string }) => {
+    return await presenter.getApprovedMatches(dateRange);
   };
 
   return {
@@ -53,6 +69,8 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
     loading,
     error,
     refresh: loadData,
-    approveMatch
+    approveMatch,
+    mergeMatches,
+    fetchApprovedCandidates
   };
 }
