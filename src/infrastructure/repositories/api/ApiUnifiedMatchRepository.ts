@@ -49,6 +49,16 @@ export class ApiUnifiedMatchRepository implements IUnifiedMatchRepository {
     return res.json();
   }
 
+  async approveMatch(id: string): Promise<boolean> {
+    const res = await fetch(`${this.baseUrl}/approve`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id })
+    });
+    if (!res.ok) throw new Error("Failed to approve match");
+    return true;
+  }
+
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {
     const res = await fetch(this.baseUrl, {
       method: 'POST',

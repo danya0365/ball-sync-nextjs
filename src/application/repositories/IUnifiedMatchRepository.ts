@@ -55,5 +55,6 @@ export interface UnifiedMatchQueryResult {
 export interface IUnifiedMatchRepository {
   query(params: UnifiedMatchQuery): Promise<UnifiedMatchQueryResult>;
   getById(id: string): Promise<UnifiedMatch | null>;
+  approveMatch(id: string): Promise<boolean>;
   upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch>;
 }

@@ -72,6 +72,16 @@ export class SupabaseUnifiedMatchRepository implements IUnifiedMatchRepository {
     return data ? this.mapToUnifiedMatch(data) : null;
   }
 
+  async approveMatch(id: string): Promise<boolean> {
+    const { error } = await this.supabase
+      .from('unified_matches')
+      .update({ is_approved: true, updated_at: new Date().toISOString() })
+      .eq('id', id);
+    
+    if (error) throw new Error(`Approve Match Error: ${error.message}`);
+    return true;
+  }
+
   async upsert(match: Partial<UnifiedMatch>): Promise<UnifiedMatch> {
     const payload: UnifiedMatchUpdate = {
       league_name_en: match.leagueNameEn,

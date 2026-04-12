@@ -2,15 +2,16 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Key, Database, BookOpen, Settings } from "lucide-react";
+import { LayoutDashboard, Key, Database, BookOpen, Settings, ShieldAlert } from "lucide-react";
 
 export function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
   const pathname = usePathname();
 
   const links = [
     { name: "Dashboard", href: "/", icon: LayoutDashboard },
-    { name: "API Keys", href: "/keys", icon: Key },
     { name: "Data Sources", href: "/sources", icon: Database },
+    { name: "Resolution Center", href: "/resolutions", icon: ShieldAlert },
+    { name: "API Keys", href: "/keys", icon: Key },
     { name: "Documentation", href: "/docs", icon: BookOpen },
     { name: "Settings", href: "/settings", icon: Settings },
   ];
