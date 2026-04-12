@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { ResolutionViewModel } from "./ResolutionPresenter";
+import { ResolutionViewModel, ResolutionDomain } from "./ResolutionPresenter";
 import { createClientResolutionPresenter } from "./ResolutionPresenterClientFactory";
 
 export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
@@ -64,10 +64,14 @@ export function useResolutionPresenter(initialViewModel?: ResolutionViewModel) {
     return await presenter.getApprovedMatches(dateRange);
   };
 
+  const [activeDomain, setActiveDomain] = useState<ResolutionDomain>('matches');
+
   return {
     viewModel,
     loading,
     error,
+    activeDomain,
+    setActiveDomain,
     refresh: loadData,
     approveMatch,
     mergeMatches,

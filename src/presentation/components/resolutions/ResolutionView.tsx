@@ -5,12 +5,19 @@ import { useResolutionPresenter } from "../../presenters/resolutions/useResoluti
 import { Card, CardContent, CardHeader, CardTitle } from "../ui/Card";
 import { CheckCircle, ShieldAlert, Clock, Info, GitMerge } from "lucide-react";
 
-import { ResolutionViewModel } from "../../presenters/resolutions/ResolutionPresenter";
+import { ResolutionViewModel, ResolutionDomain } from "../../presenters/resolutions/ResolutionPresenter";
 import { MergeMatchModal } from "./MergeMatchModal";
 import { UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
 
+const DOMAINS: { id: ResolutionDomain, label: string, disabled?: boolean }[] = [
+  { id: 'matches', label: 'Matches' },
+  { id: 'teams', label: 'Teams', disabled: true },
+  { id: 'leagues', label: 'Leagues', disabled: true },
+  { id: 'players', label: 'Players', disabled: true },
+];
+
 export function ResolutionView({ initialViewModel }: { initialViewModel?: ResolutionViewModel }) {
-  const { viewModel, loading, error, approveMatch, mergeMatches, fetchApprovedCandidates } = useResolutionPresenter(initialViewModel);
+  const { viewModel, loading, error, activeDomain, setActiveDomain, approveMatch, mergeMatches, fetchApprovedCandidates } = useResolutionPresenter(initialViewModel);
   const [mergeTarget, setMergeTarget] = useState<UnifiedMatch | null>(null);
 
   if (loading) {
@@ -48,7 +55,29 @@ export function ResolutionView({ initialViewModel }: { initialViewModel?: Resolu
         Review unverified matches pulled from sources. Approve to promote them to Golden Records, or Merge duplicate records together.
       </p>
 
-      {matches.length === 0 ? (
+      {/* Tier 1: Domain Selection */}
+      <div className="flex flex-wrap gap-2 mb-6">
+        {DOMAINS.map(domain => (
+          <button
+            key={domain.id}
+            onClick={() => !domain.disabled && setActiveDomain(domain.id)}
+            disabled={domain.disabled}
+            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+              activeDomain === domain.id
+                ? "bg-slate-800 dark:bg-white text-white dark:text-slate-900 shadow-md transform scale-105"
+                : domain.disabled
+                  ? "bg-slate-100 dark:bg-slate-800/50 text-slate-400 dark:text-slate-600 cursor-not-allowed border border-dashed border-slate-300 dark:border-slate-700"
+                  : "bg-white dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700"
+            }`}
+          >
+            {domain.label}
+            {domain.disabled && <span className="ml-2 text-[10px] font-normal uppercase tracking-wider opacity-60">Soon</span>}
+          </button>
+        ))}
+      </div>
+
+      {activeDomain === 'matches' && (
+        matches.length === 0 ? (
         <Card className="bg-white/60 dark:bg-slate-900/40 backdrop-blur-md border-white/40 dark:border-white/5 border-dashed">
           <CardContent className="flex flex-col items-center justify-center p-16 text-center text-slate-500">
             <CheckCircle className="w-12 h-12 mb-4 text-green-400" />
@@ -107,7 +136,7 @@ export function ResolutionView({ initialViewModel }: { initialViewModel?: Resolu
             </Card>
           ))}
         </div>
-      )}
+      ))}
 
       {/* Merge Modal */}
       {mergeTarget && (

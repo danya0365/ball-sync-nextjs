@@ -1,5 +1,7 @@
 import { IUnifiedMatchRepository, UnifiedMatch } from "@/src/application/repositories/IUnifiedMatchRepository";
 
+export type ResolutionDomain = 'matches' | 'teams' | 'leagues' | 'players';
+
 export interface ResolutionViewModel {
   pendingMatches: UnifiedMatch[];
   isApproving: boolean;
