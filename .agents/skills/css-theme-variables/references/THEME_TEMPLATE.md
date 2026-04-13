@@ -1,7 +1,14 @@
+# CSS Theme Template
+
+ไฟล์ต้นแบบสำหรับ `public/styles/theme.css`
+
+## Complete Template
+
+```css
 @custom-variant dark (&:is(.dark *));
 
 /* ============================================
-   BallSync — Theme Tokens & Variables
+   [Project] — Theme Tokens & Variables
 
    :root        → ประกาศตัวแปรทั้งหมด (Light mode)
    .dark        → Override ตัวแปรทั้งหมด (Dark mode)
@@ -12,16 +19,22 @@
    1. LIGHT MODE - ประกาศตัวแปรทั้งหมดที่นี่
    ============================================ */
 :root {
-  /* Surface Colors */
+  /* Surface Colors (Semantic) */
   --background: #f8fafc;
   --foreground: #0f172a;
   --card: #ffffff;
   --card-foreground: #0f172a;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
-  /* Border */
+  /* Border & Input */
   --border: #e2e8f0;
+  --input: #e2e8f0;
+  --ring: #3b82f6;
 
-  /* Brand Colors (Blue Scale) */
+  /* Brand Colors (Primary - Blue) */
   --brand-50: #eff6ff;
   --brand-100: #dbeafe;
   --brand-200: #bfdbfe;
@@ -33,7 +46,11 @@
   --brand-800: #1e40af;
   --brand-900: #1e3a8a;
 
-  /* Surface Scale */
+  /* Semantic Brand */
+  --primary: var(--brand-500);
+  --primary-foreground: #ffffff;
+
+  /* Surface Scale (Gray/Slate) */
   --surface-50: #f8fafc;
   --surface-100: #f1f5f9;
   --surface-200: #e2e8f0;
@@ -50,16 +67,22 @@
    2. DARK MODE - Override ทั้งหมดที่นี่
    ============================================ */
 .dark {
-  /* Surface Colors */
+  /* Surface Colors (Semantic) */
   --background: #09090b;
   --foreground: #fafafa;
   --card: #09090b;
   --card-foreground: #fafafa;
+  --popover: #09090b;
+  --popover-foreground: #fafafa;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
 
-  /* Border */
+  /* Border & Input */
   --border: #27272a;
+  --input: #27272a;
+  --ring: #3b82f6;
 
-  /* Brand Colors (Blue Scale - สว่างขึ้นใน Dark Mode) */
+  /* Brand Colors (Inverted for visibility) */
   --brand-50: #1e3a8a;
   --brand-100: #1e40af;
   --brand-200: #1d4ed8;
@@ -71,7 +94,11 @@
   --brand-800: #dbeafe;
   --brand-900: #eff6ff;
 
-  /* Surface Scale (Dark) */
+  /* Semantic Brand */
+  --primary: var(--brand-500);
+  --primary-foreground: #09090b;
+
+  /* Surface Scale (Zinc Dark) */
   --surface-50: #18181b;
   --surface-100: #27272a;
   --surface-200: #3f3f46;
@@ -90,20 +117,28 @@
    ============================================ */
 @theme inline {
   /* Font */
-  --font-sans:
-    "Noto Sans Thai", var(--font-noto-sans-thai), ui-sans-serif, system-ui,
-    sans-serif;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
 
-  /* Surface */
+  /* Surface (Semantic) */
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
   --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
 
-  /* Border */
+  /* Border & Input */
   --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
 
-  /* Brand Scale - ใช้ตัวแปรจาก :root */
+  /* Primary */
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+
+  /* Brand Scale */
   --color-brand-50: var(--brand-50);
   --color-brand-100: var(--brand-100);
   --color-brand-200: var(--brand-200);
@@ -115,7 +150,7 @@
   --color-brand-800: var(--brand-800);
   --color-brand-900: var(--brand-900);
 
-  /* Surface Scale - ใช้ตัวแปรจาก :root */
+  /* Surface Scale */
   --color-surface-50: var(--surface-50);
   --color-surface-100: var(--surface-100);
   --color-surface-200: var(--surface-200);
@@ -127,3 +162,25 @@
   --color-surface-800: var(--surface-800);
   --color-surface-900: var(--surface-900);
 }
+```
+
+## Color Scales Reference
+
+### Brand Scale (Primary)
+- `50-300` → Light backgrounds, subtle highlights
+- `400-600` → Main actions, buttons, links (Primary)
+- `700-900` → Hover states, dark accents
+
+### Surface Scale
+- `50-200` → Card backgrounds, hover states
+- `300-500` → Borders, dividers, secondary text
+- `600-900` → Primary text, strong contrast
+
+### Semantic Mapping
+| Semantic | Light | Dark |
+|----------|-------|------|
+| `--background` | `surface-50` | Zinc 950 |
+| `--foreground` | `surface-900` | Zinc 50 |
+| `--border` | `surface-200` | Zinc 800 |
+| `--muted` | `surface-100` | Zinc 800 |
+| `--muted-foreground` | `surface-500` | Zinc 400 |
